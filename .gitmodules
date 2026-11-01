@@ -1,7 +1,3 @@
-[submodule "computer-audio-engineering-services-section"]
-	path = services/computer-audio-engineering-services-section
-	url = https://github.com/red-cup-engineering/computer-audio-engineering-services-section.git
-	branch = main
 [submodule "computer-news-media-systems-engineering-services-section"]
 	path = services/computer-news-media-systems-engineering-services-section
 	url = https://github.com/red-cup-engineering/computer-news-media-systems-engineering-services-section.git
