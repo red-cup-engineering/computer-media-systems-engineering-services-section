@@ -5,3 +5,7 @@
 	path = services/public-fiction-media-services-section
 	url = https://github.com/red-cup-engineering/public-fiction-media-services-section.git
 	branch = main
+[submodule "services/public-games-services-section"]
+	path = services/public-games-services-section
+	url = https://github.com/red-cup-engineering/public-games-services-section.git
+	branch = main
