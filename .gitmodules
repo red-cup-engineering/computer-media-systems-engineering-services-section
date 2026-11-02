@@ -1,4 +1,4 @@
-[submodule "computer-news-media-systems-engineering-services-section"]
+[submodule "services/computer-news-media-systems-engineering-services-section"]
 	path = services/computer-news-media-systems-engineering-services-section
 	url = https://github.com/red-cup-engineering/computer-news-media-systems-engineering-services-section.git
 [submodule "services/public-fiction-media-services-section"]
