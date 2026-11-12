@@ -96,6 +96,7 @@
     "@red-cup-engineering/json-services-section": "1.0.0",
     "@red-cup-engineering/news-property": "0.2.0",
     "@red-cup-engineering/organizing": "0.1.0",
-    "@red-cup-engineering/semiotic-eavt-services-section": "0.1.0"
+    "@red-cup-engineering/semiotic-eavt-services-section": "0.1.0",
+    "@red-cup-engineering/semiotic-eavt-engineering-services-section": "^0.6.0"
   }
 }
