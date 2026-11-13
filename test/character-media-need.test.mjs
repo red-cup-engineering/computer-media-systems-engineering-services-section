@@ -11,7 +11,7 @@ const scene = {
 };
 const commission = {
   actorId: scene.actorId, sceneId: scene.sceneId,
-  consumer: 'causeway-services/yanagi-services-section', reviewer: 'causeway-public-media',
+  consumer: 'causeway-services/public-yanagi-services-section', reviewer: 'causeway-public-media',
   objective: 'One candidate cartoon panel for independent receiving', openedAt: '2026-10-22T20:00:00Z',
   outputs: [{ medium: 'one-panel-cartoon', purpose: 'yanagi-cheek-metric-panel', destination: 'source-owned-review-queue' }],
 };
