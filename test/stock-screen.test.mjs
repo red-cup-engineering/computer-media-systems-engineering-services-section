@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { validateStockScreenBatch } from "../src/stock-screen.mjs";
-import { validateJsonSchema } from "@red-cup-engineering/json-schema-services-section/validation";
+import { validateJsonSchema } from "@red-cup-engineering/json-schema-engineering-services-section/validation";
 import schema from "../data/schemas/stock-asset-record.schema.json" with { type: "json" };
 const fixtureUrl = new URL("./fixtures/data/stock-assets/koios-live-article-art-screen-20261006.json", import.meta.url);
 const original = JSON.parse(await readFile(fixtureUrl, "utf8"));

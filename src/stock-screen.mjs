@@ -1,4 +1,4 @@
-import { validateJsonSchema } from "@red-cup-engineering/json-schema-services-section/validation";
+import { validateJsonSchema } from "@red-cup-engineering/json-schema-engineering-services-section/validation";
 import schema from "../data/schemas/stock-asset-record.schema.json" with { type: "json" };
 
 /**

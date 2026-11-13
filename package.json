@@ -91,9 +91,9 @@
   },
   "dependencies": {
     "@causeway-services/public-education-services-section": "0.0.0",
-    "@red-cup-engineering/google-flow-services-section": "0.1.0",
-    "@red-cup-engineering/json-schema-services-section": "0.3.0",
-    "@red-cup-engineering/json-services-section": "1.0.0",
+    "@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section": "0.1.0",
+    "@red-cup-engineering/json-schema-engineering-services-section": "0.3.0",
+    "@red-cup-engineering/json-engineering-services-section": "1.0.0",
     "@red-cup-engineering/news-property": "0.2.0",
     "@red-cup-engineering/organizing": "0.1.0",
     "@red-cup-engineering/semiotic-eavt-services-section": "0.1.0",

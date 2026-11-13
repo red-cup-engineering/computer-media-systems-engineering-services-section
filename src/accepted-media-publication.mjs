@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve, sep } from "node:path";
-import * as googleFlow from "@red-cup-engineering/google-flow-services-section/flow-generate";
+import * as googleFlow from "@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section/flow-generate";
 import {
   readMediaAllocationStates, readMediaArtifactReviews, readMediaDemandInbox, recordMediaAllocationState,
 } from "./media-demand-journal.mjs";

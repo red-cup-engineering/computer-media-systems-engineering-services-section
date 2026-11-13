@@ -1,4 +1,4 @@
-import * as googleFlow from "@red-cup-engineering/google-flow-services-section/flow-generate";
+import * as googleFlow from "@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section/flow-generate";
 import { readMediaAllocationStates, recordMediaAllocationState } from "./media-demand-journal.mjs";
 
 const at = (value, fallback) => Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : fallback.toISOString();
@@ -20,7 +20,7 @@ export function reconcileFlowMediaAllocations({ root, flow = googleFlow, now = n
     const write=(state,receipt,recordedAt)=>{
       const result=recordMediaAllocationState({
         root,allocation:current.allocation,mediaNeed:current.mediaNeed,purpose:current.purpose,count:current.count,
-        state,provider:current.provider,at:recordedAt,receipt,origin:"@red-cup-engineering/google-flow-services-section",
+        state,provider:current.provider,at:recordedAt,receipt,origin:"@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section",
       });
       current={...current,state,recordedAt,receipt};latest.set(current.allocation,current);
       transitions.push({allocation:current.allocation,state,appended:result.appended,receipt});

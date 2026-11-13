@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { canonicalJson } from "@red-cup-engineering/json-services-section/canonical-json";
+import { canonicalJson } from "@red-cup-engineering/json-engineering-services-section/canonical-json";
 import { createSemanticRecordJournal } from "@red-cup-engineering/semiotic-eavt-services-section/record-semantic-record";
 import { admitMediaNeed, mediaDemandFrontier, planMediaAllowance } from "./media-demand-market.mjs";
 import { normalizeReadinessEvidence, aggregateReadinessEvidence, scopeMediaReadinessEvidence } from "./media-readiness-evidence.mjs";

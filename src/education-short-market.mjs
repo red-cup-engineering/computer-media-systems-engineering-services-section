@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { canonicalJson } from "@red-cup-engineering/json-services-section/canonical-json";
+import { canonicalJson } from "@red-cup-engineering/json-engineering-services-section/canonical-json";
 import {
   planMediaDemandInbox, readMediaAllocationStates, readMediaDemandInbox, recordMediaAllocationState, recordMediaNeed, recordMediaReadiness,
 } from "./media-demand-journal.mjs";

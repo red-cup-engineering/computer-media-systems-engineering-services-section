@@ -1,5 +1,5 @@
 /** Request-specific bids inhabit the EXISTING semantic-record substrate. */
-import {canonicalJson} from "@red-cup-engineering/json-services-section/canonical-json";
+import {canonicalJson} from "@red-cup-engineering/json-engineering-services-section/canonical-json";
 import {createSemanticRecordJournal} from "@red-cup-engineering/semiotic-eavt-services-section/record-semantic-record";
 import {readMediaDemandInbox} from "./media-demand-journal.mjs";
 import {admitMediaProviderBid,prepareMediaAwardReservation} from "./media-provider-bid-contract.mjs";

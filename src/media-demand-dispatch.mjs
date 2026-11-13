@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { canonicalJson } from "@red-cup-engineering/json-services-section/canonical-json";
-import * as googleFlow from "@red-cup-engineering/google-flow-services-section/flow-generate";
+import { canonicalJson } from "@red-cup-engineering/json-engineering-services-section/canonical-json";
+import * as googleFlow from "@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section/flow-generate";
 import { planMediaDemandInbox, readMediaDemandInbox, recordMediaAllocationState } from "./media-demand-journal.mjs";
 
 const allocationId = (value) => `ni:///sha-256;${createHash("sha256").update(canonicalJson(value)).digest("base64url")}`;
