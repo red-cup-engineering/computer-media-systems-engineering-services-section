@@ -85,7 +85,7 @@ This is not a canonical full-root install, registry publication of this private
 root package, or evidence of any live Causeway consumer using the revision.
 
 The broader root package has genuine additional receiving contracts:
-- `json-services-section@1.0.0`: canonical immutable demand/allocation/bid IDs.
+- `json-engineering-services-section@1.0.0`: canonical immutable demand/allocation/bid IDs.
 - `json-schema-engineering-services-section@0.3.0`: exported retained-stock-screen validation.
 - `public-education-services-section@0.0.0`: Education channel/short-service and
   education-media-turn CLI.
