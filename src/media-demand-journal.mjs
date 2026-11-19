@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { canonicalJson } from "@red-cup-engineering/json-engine/canonical-json";
 import { createEvidenceJournal } from "@red-cup-engineering/semantic-record-journal-service";
-import { admitMediaNeed, mediaDemandFrontier, planMediaAllowance } from "./media-demand-market.mjs";
+import { validateMediaNeed, mediaDemandFrontier, planMediaAllowance } from "./media-demand-market.mjs";
 import { normalizeReadinessEvidence, aggregateReadinessEvidence, scopeMediaReadinessEvidence } from "./media-readiness-evidence.mjs";
 import {measureMediaDemandConservation,mediaArtifactKey} from "./media-demand-conservation.mjs";
 import {validateAcceptedMediaAsset} from "./media-accepted-asset-contract.mjs";
@@ -42,7 +42,7 @@ const log = (root, objectKind) => createEvidenceJournal({ root, objectKind });
 export function createMediaNeed(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new TypeError("media need must be an object");
   const { id: supplied, ...body } = value;
-  return admitMediaNeed({ ...body, id: supplied ?? contentId(body) });
+  return validateMediaNeed({ ...body, id: supplied ?? contentId(body) });
 }
 
 export function recordMediaNeed({ root, need, origin } = {}) {
@@ -201,7 +201,7 @@ function latestReadiness(root) {
 export function readMediaDemandInbox({ root, consumer, now = new Date() } = {}) {
   const needsById = new Map();
   for (const row of log(root, MEDIA_NEED_OBJECT_KIND).query({ category: MEDIA_NEED_CATEGORY })) {
-    const need = admitMediaNeed(row.record);
+    const need = validateMediaNeed(row.record);
     if (consumer === undefined || need.consumer === consumer) needsById.set(need.id, need);
   }
   const { receiver, artifact } = scopeMediaReadinessEvidence(latestReadiness(root), [...needsById.values()]);
