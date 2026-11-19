@@ -3,11 +3,6 @@
   "version": "0.2.1-dev.2",
   "type": "module",
   "description": "Service boundary for representing, transforming, and observing computer media content. Also Causeway Public Media demand, allowance allocation, performance evidence, artifact review, channel formation and public distribution (received from red-cup-engineering/media-engineering-services-section).",
-  "keywords": [
-    "digital-media",
-    "media-processing",
-    "multimedia"
-  ],
   "exports": {
     ".": "./src/media-demand-market.mjs",
     "./media-demand-market": "./src/media-demand-market.mjs",
@@ -49,21 +44,6 @@
     "url": "git+https://github.com/red-cup-engineering/computer-media-systems-engineering-services-section.git"
   },
   "license": "MIT",
-  "funding": {
-    "type": "individual",
-    "url": "https://github.com/561-group/.github/blob/main/TIPS.md"
-  },
-  "scripts": {
-    "check:stock-screen": "node scripts/validate-stock-screen.mjs",
-    "check:toonsday": "node --check \"services/public-fiction-media-services-section/src/microdrama-production.mjs\" && node --check \"services/public-fiction-media-services-section/src/paracosm-video-binding.mjs\"",
-    "check:character-media": "node --check src/character-media-need.mjs",
-    "check:mythopoetry": "node --check \"services/public-fiction-media-services-section/src/agent-episode-reading.mjs\" && node --check \"services/public-fiction-media-services-section/services/public-paracosm-media-services-section/services/unassigned-floor-paracosm-services-section/src/creative-council.mjs\"",
-    "check:a2a-agent-reader": "node --check \"services/public-fiction-media-services-section/apps/serve-agent-episode.mjs\"",
-    "compare:web-images": "node scripts/benchmark-web-image-fixtures.mjs"
-  },
-  "engines": {
-    "node": ">=24"
-  },
   "bin": {
     "project-youtube-analytics": "./apps/project-youtube-analytics.mjs",
     "dispatch-media-demand": "./apps/dispatch-media-demand.mjs",
