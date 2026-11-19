@@ -4,7 +4,7 @@ import { createEvidenceJournal } from "@red-cup-engineering/semantic-record-jour
 import { admitMediaNeed, mediaDemandFrontier, planMediaAllowance } from "./media-demand-market.mjs";
 import { normalizeReadinessEvidence, aggregateReadinessEvidence, scopeMediaReadinessEvidence } from "./media-readiness-evidence.mjs";
 import {measureMediaDemandConservation,mediaArtifactKey} from "./media-demand-conservation.mjs";
-import {admitAcceptedMediaAsset} from "./media-accepted-asset-contract.mjs";
+import {validateAcceptedMediaAsset} from "./media-accepted-asset-contract.mjs";
 
 export const MEDIA_NEED_OBJECT_KIND = "media-need";
 export const MEDIA_NEED_CATEGORY = "need";
@@ -37,7 +37,7 @@ const instant = (value, label) => {
   return new Date(at).toISOString();
 };
 const contentId = (value) => `ni:///sha-256;${createHash("sha256").update(canonicalJson(value)).digest("base64url")}`;
-const journal = (root, objectKind) => createEvidenceJournal({ root, objectKind });
+const log = (root, objectKind) => createEvidenceJournal({ root, objectKind });
 
 export function createMediaNeed(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new TypeError("media need must be an object");
@@ -47,7 +47,7 @@ export function createMediaNeed(value) {
 
 export function recordMediaNeed({ root, need, origin } = {}) {
   const record = createMediaNeed(need);
-  const receipt = journal(root, MEDIA_NEED_OBJECT_KIND).record({
+  const receipt = log(root, MEDIA_NEED_OBJECT_KIND).record({
     category: MEDIA_NEED_CATEGORY,
     record,
     recordedAt: record.openedAt,
@@ -77,7 +77,7 @@ export function recordMediaReadiness({
     recordedAt,
     ...(destination === undefined ? {} : { destination: text(destination, "readiness destination") }),
   });
-  return journal(root, MEDIA_READINESS_OBJECT_KIND).record({
+  return log(root, MEDIA_READINESS_OBJECT_KIND).record({
     category: MEDIA_READINESS_CATEGORY,
     record,
     recordedAt,
@@ -87,7 +87,7 @@ export function recordMediaReadiness({
 }
 
 function allocationRows(root) {
-  return journal(root, MEDIA_ALLOCATION_OBJECT_KIND).query({ category: MEDIA_ALLOCATION_CATEGORY });
+  return log(root, MEDIA_ALLOCATION_OBJECT_KIND).query({ category: MEDIA_ALLOCATION_CATEGORY });
 }
 
 function latestAllocationStates(root) {
@@ -137,7 +137,7 @@ export function recordMediaAllocationState({
     ...awarded,
     ...(receipt === undefined ? {} : { receipt: text(receipt, "receipt") }),
   });
-  return journal(root, MEDIA_ALLOCATION_OBJECT_KIND).record({
+  return log(root, MEDIA_ALLOCATION_OBJECT_KIND).record({
     category: MEDIA_ALLOCATION_CATEGORY,
     record,
     recordedAt,
@@ -166,9 +166,9 @@ export function recordMediaArtifactReview({
   if (Date.parse(recordedAt) < Date.parse(current.recordedAt)) throw new Error("artifact review cannot predate its current allocation state");
   let acceptedAsset, release;
   if(accepted){
-    const admitted=admitAcceptedMediaAsset({asset,distribution});
-    acceptedAsset=admitted.asset;
-    release=admitted.distribution;
+    const validated=validateAcceptedMediaAsset({asset,distribution});
+    acceptedAsset=validated.asset;
+    release=validated.distribution;
   }
   const record = Object.freeze({
     type: "MediaArtifactReview", version: 1, allocation: id,
@@ -177,7 +177,7 @@ export function recordMediaArtifactReview({
     authority: text(authority, "review authority"), basis: text(basis, "review basis"), recordedAt,
     ...(accepted ? { asset: acceptedAsset, ...(release ? { distribution: release } : {}) } : {}),
   });
-  return journal(root, MEDIA_ARTIFACT_REVIEW_OBJECT_KIND).record({
+  return log(root, MEDIA_ARTIFACT_REVIEW_OBJECT_KIND).record({
     category: MEDIA_ARTIFACT_REVIEW_CATEGORY,
     record, recordedAt, told: { for: accepted, against: !accepted }, origin: origin ?? record.authority,
   });
@@ -185,7 +185,7 @@ export function recordMediaArtifactReview({
 
 export function readMediaArtifactReviews({ root, accepted } = {}) {
   const latest = new Map();
-  for (const row of journal(root, MEDIA_ARTIFACT_REVIEW_OBJECT_KIND).query({ category: MEDIA_ARTIFACT_REVIEW_CATEGORY })) {
+  for (const row of log(root, MEDIA_ARTIFACT_REVIEW_OBJECT_KIND).query({ category: MEDIA_ARTIFACT_REVIEW_CATEGORY })) {
     const prior=latest.get(row.record.allocation);
     if(!prior || prior.recordedAt.localeCompare(row.record.recordedAt)<=0) latest.set(row.record.allocation,row.record);
   }
@@ -194,13 +194,13 @@ export function readMediaArtifactReviews({ root, accepted } = {}) {
 }
 
 function latestReadiness(root) {
-  return aggregateReadinessEvidence(journal(root, MEDIA_READINESS_OBJECT_KIND)
+  return aggregateReadinessEvidence(log(root, MEDIA_READINESS_OBJECT_KIND)
     .query({ category: MEDIA_READINESS_CATEGORY }).map(row => row.record));
 }
 
 export function readMediaDemandInbox({ root, consumer, now = new Date() } = {}) {
   const needsById = new Map();
-  for (const row of journal(root, MEDIA_NEED_OBJECT_KIND).query({ category: MEDIA_NEED_CATEGORY })) {
+  for (const row of log(root, MEDIA_NEED_OBJECT_KIND).query({ category: MEDIA_NEED_CATEGORY })) {
     const need = admitMediaNeed(row.record);
     if (consumer === undefined || need.consumer === consumer) needsById.set(need.id, need);
   }

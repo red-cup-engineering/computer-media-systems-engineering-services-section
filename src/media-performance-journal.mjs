@@ -40,7 +40,7 @@ function requiredText(value, label) {
   return value.trim();
 }
 
-function admittedObservation(value) {
+function validatedObservation(value) {
   if (!value || value.type !== "MediaPerformanceObservation") throw new TypeError("media performance observation type must be MediaPerformanceObservation");
   const observedAt = requiredText(value.observedAt, "observedAt");
   if (!Number.isFinite(Date.parse(observedAt))) throw new TypeError("observedAt must be an instant");
@@ -69,9 +69,9 @@ function admittedObservation(value) {
  * available for later analyses. Content identity + the original observedAt make replay idempotent.
  */
 export function recordMediaPerformanceObservation({ root, observation, origin } = {}) {
-  const record = admittedObservation(observation);
-  const journal = createEvidenceJournal({ root, objectKind: MEDIA_PERFORMANCE_OBJECT_KIND });
-  return journal.record({
+  const record = validatedObservation(observation);
+  const log = createEvidenceJournal({ root, objectKind: MEDIA_PERFORMANCE_OBJECT_KIND });
+  return log.record({
     category: YOUTUBE_PERFORMANCE_CATEGORY,
     record,
     recordedAt: record.observedAt,
@@ -83,13 +83,13 @@ export function recordMediaPerformanceObservation({ root, observation, origin } 
 /** Project a batch and report how many new journal events were appended. */
 export function recordMediaPerformanceObservations({ root, observations, origin } = {}) {
   if (!Array.isArray(observations)) throw new TypeError("observations must be a list");
-  const receipts = observations.map((observation) => recordMediaPerformanceObservation({ root, observation, origin }));
+  const records = observations.map((observation) => recordMediaPerformanceObservation({ root, observation, origin }));
   return Object.freeze({
     type: "MediaPerformanceProjectionReceipt",
     objectKind: MEDIA_PERFORMANCE_OBJECT_KIND,
-    observations: receipts.length,
-    appended: receipts.reduce((sum, receipt) => sum + receipt.appended, 0),
-    receipts: Object.freeze(receipts),
+    observations: records.length,
+    appended: records.reduce((sum, receipt) => sum + receipt.appended, 0),
+    receipts: Object.freeze(records),
   });
 }
 

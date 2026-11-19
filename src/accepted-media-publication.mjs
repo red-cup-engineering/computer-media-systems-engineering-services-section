@@ -5,7 +5,7 @@ import * as googleFlow from "@red-cup-engineering/google-flow-computer-inference
 import {
   readMediaAllocationStates, readMediaArtifactReviews, readMediaDemandInbox, recordMediaAllocationState,
 } from "./media-demand-journal.mjs";
-import { qualifyMediaSocialDistributor, qualifyMediaSocialReadback } from './media-social-receiving.mjs';
+import { validateMediaSocialDistributor, validateMediaSocialReadback } from './media-social-receiving.mjs';
 
 const TID_ALPHABET="234567abcdefghijklmnopqrstuvwxyz";
 
@@ -41,10 +41,10 @@ export async function publishAcceptedMedia({
     try{distribution=await import("@red-cup-engineering/news-property/distribute");}
     catch{return Object.freeze({type:"AcceptedMediaPublication",status:"blocked",reason:"retry-safe-bluesky-media-upgrade-not-released",published:Object.freeze([])});}
   }
-  const socialAdmission=qualifyMediaSocialDistributor(distribution);
-  if(!socialAdmission.ok) {
+  const socialValidation=validateMediaSocialDistributor(distribution);
+  if(!socialValidation.ok) {
     return Object.freeze({type:"AcceptedMediaPublication",status:"blocked",
-      reason:socialAdmission.reason,published:Object.freeze([])});
+      reason:socialValidation.reason,published:Object.freeze([])});
   }
   if(typeof flow.recordFlowDelivery!=="function" || typeof flow.flowMediaInventory!=="function") {
     return Object.freeze({type:"AcceptedMediaPublication",status:"blocked",reason:"google-flow-delivery-upgrade-not-released",published:Object.freeze([])});
@@ -98,17 +98,17 @@ export async function publishAcceptedMedia({
     if(digest!==review.asset.sha256){obstructions.push({allocation:state.allocation,reason:"accepted-asset-digest-mismatch"});continue;}
     const {handle,text,url}=review.distribution;
     const rkey=blueskyTid({at:review.recordedAt,salt:review.allocation});
-    const receipt=await distribution.postBluesky({
+    const record=await distribution.postBluesky({
       handle,appPassword:env.BLUESKY_APP_PASSWORD,fetch,now:()=>review.recordedAt,
       stories:[{
         text,url,rkey,
         image:{bytes,mimeType:review.asset.mimeType,alt:review.asset.altText,sanitized:true,aspectRatio:{width:review.asset.width,height:review.asset.height}},
       }],
     });
-    if(receipt.status!=="ok" || !receipt.uri || !receipt.cid || !receipt.did ||
-       receipt.uri!=="at://"+receipt.did+"/app.bsky.feed.post/"+rkey){
+    if(record.status!=="ok" || !record.uri || !record.cid || !record.did ||
+       record.uri!=="at://"+record.did+"/app.bsky.feed.post/"+rkey){
       obstructions.push({allocation:state.allocation,
-        reason:receipt.reason??"authenticated-strong-provider-receipt-required"});
+        reason:record.reason??"authenticated-strong-provider-receipt-required"});
       continue;
     }
 
@@ -118,7 +118,7 @@ export async function publishAcceptedMedia({
     if(state.state==="generated"){
       try {
         recordMediaAllocationState({root,...state,state:"delivered",at:now.toISOString(),
-          receipt:receipt.uri,origin:"@causeway-services/public-media-services-section"});
+          receipt:record.uri,origin:"@causeway-services/public-media-services-section"});
         state={...state,state:"delivered",recordedAt:now.toISOString()};
         allocations.set(state.allocation,state);
       }catch(error){
@@ -130,13 +130,13 @@ export async function publishAcceptedMedia({
     let observation;
     try {
       observation=await distribution.observeBlueskyPost({
-        uri:receipt.uri,cid:receipt.cid,did:receipt.did,text,url,
+        uri:record.uri,cid:record.cid,did:record.did,text,url,
         imageAlt:review.asset.altText,fetch,
       });
     }catch(error){
       observation={status:"held",reason:"public-readback-unavailable: "+error.message};
     }
-    const qualified=qualifyMediaSocialReadback({receipt,observation,rkey});
+    const qualified=validateMediaSocialReadback({receipt: record,observation,rkey});
     if(!qualified.ok){
       obstructions.push({allocation:state.allocation,
         reason:"public-readback-not-received: "+(observation?.reason??qualified.reason)});
@@ -163,8 +163,8 @@ export async function publishAcceptedMedia({
     }
     state={...state,state:"public-use",recordedAt:now.toISOString()};allocations.set(state.allocation,state);
     published.push({allocation:state.allocation,mediaNeed:state.mediaNeed,purpose:state.purpose,
-      uri:receipt.uri,cid:receipt.cid,publicAddress,providerReceipt:delivery.id,
-      publicReadback:qualified.source,recovered:receipt.posts?.[0]?.recovered===true});
+      uri:record.uri,cid:record.cid,publicAddress,providerReceipt:delivery.id,
+      publicReadback:qualified.source,recovered:record.posts?.[0]?.recovered===true});
   }
   return Object.freeze({type:"AcceptedMediaPublication",status:obstructions.length?"held":"complete",observedAt:now.toISOString(),published:Object.freeze(published),released:Object.freeze(released),obstructions:Object.freeze(obstructions)});
 }

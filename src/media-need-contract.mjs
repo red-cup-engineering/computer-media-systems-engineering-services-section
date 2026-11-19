@@ -15,7 +15,7 @@ const instant = (value, label) => {
   return new Date(time).toISOString();
 };
 
-export function admitMediaNeed(value) {
+export function validateMediaNeed(value) {
   if (!value || value.type !== "MediaNeed") throw new TypeError("media need type must be MediaNeed");
   const id = TEXT(value.id, "media need id");
   const consumer = TEXT(value.consumer, "media need consumer");
@@ -28,13 +28,13 @@ export function admitMediaNeed(value) {
   const artifacts = value.artifacts.map((artifact,index)=>{
     const capability=TEXT(artifact?.capability,`artifact ${index} capability`);
     const purpose=TEXT(artifact?.purpose,`artifact ${index} purpose`);
-    const disposition=artifact?.disposition ?? "admissible";
-    if (!["admissible","conditional","hold","ineligible"].includes(disposition)) throw new TypeError(`artifact ${index} disposition is invalid`);
+    const decision=artifact?.disposition ?? "admissible";
+    if (!["admissible","conditional","hold","ineligible"].includes(decision)) throw new TypeError(`artifact ${index} disposition is invalid`);
     const priority=INTEGER(artifact?.priority,`artifact ${index} priority`);
     const wanted=INTEGER(artifact?.wanted,`artifact ${index} wanted`,1);
     if (wanted < 0) throw new TypeError(`artifact ${index} wanted must be non-negative`);
     return Object.freeze({
-      ...artifact, capability,purpose,disposition,priority,wanted,
+      ...artifact, capability,purpose,disposition: decision,priority,wanted,
       ...(artifact?.condition ? {condition:TEXT(artifact.condition,`artifact ${index} condition`)} : {}),
       ...(artifact?.destination ? {destination:TEXT(artifact.destination,`artifact ${index} destination`)} : {}),
     });

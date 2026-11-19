@@ -1,7 +1,7 @@
 import { latestMediaPerformanceByVideo, youtubeVideoIdOf, parentYouTubeVideoIdOf } from "./media-performance-journal.mjs";
 import { readMediaAllocationStates, readMediaArtifactReviews, readMediaDemandInbox } from "./media-demand-journal.mjs";
 import { mediaArtifactReviewQueue } from "./media-artifact-review-queue.mjs";
-import { mediaChannelCandidateReadout } from "./media-channel-candidates.mjs";
+import { mediaChannelCandidateReport } from "./media-channel-candidates.mjs";
 
 const number = (value) => { const n=Number(value); return Number.isFinite(n)?n:null; };
 const ratio = (numerator, denominator) => (
@@ -119,14 +119,14 @@ function shortPairs(performance){
 }
 
 /** A descriptive CMO readout. It intentionally reports evidence and custody, not a universal media score. */
-export function mediaPortfolioReadout({root,flow,repositoryRoot,env=process.env,now=new Date()}={}){
+export function mediaPortfolioReport({root,flow,repositoryRoot,env=process.env,now=new Date()}={}){
   const performance=latestMediaPerformanceByVideo({root}).map(performanceRow);
   const inbox=readMediaDemandInbox({root,now});
   const allocations=readMediaAllocationStates({root});
   const reviews=readMediaArtifactReviews({root});
   const reviewQueue=mediaArtifactReviewQueue({root,flow,now});
   const channelCandidates=repositoryRoot
-    ? mediaChannelCandidateReadout({repositoryRoot,root,env,now})
+    ? mediaChannelCandidateReport({repositoryRoot,root,env,now})
     : null;
   return Object.freeze({
     type:"CausewayMediaPortfolioReadout",observedAt:now.toISOString(),

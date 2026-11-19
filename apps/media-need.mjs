@@ -2,12 +2,12 @@
 /** Portable author-side MediaNeed requirement check and trusted journal ingest. */
 import {readFileSync,realpathSync} from "node:fs";
 import {resolve,relative,isAbsolute,sep} from "node:path";
-import {admitMediaNeed} from "../src/media-need-contract.mjs";
+import {validateMediaNeed} from "../src/media-need-contract.mjs";
 const [mode,file,...extra]=process.argv.slice(2);
 if(!["--check","--record"].includes(mode)||!file||extra.length)throw new Error("Usage: media-need.mjs --check|--record MEDIA_NEED.json");
 const source=JSON.parse(readFileSync(file,"utf8"));
 const raw={...source,id:source.id??"unassigned-source-draft"};
-const validated=admitMediaNeed(raw);
+const validated=validateMediaNeed(raw);
 if(!source.source||typeof source.source!=="object"||Array.isArray(source.source)
   ||!Object.values(source.source).some(x=>typeof x==="string"&&x.trim()))
   throw new TypeError("a source reference or revision is required");
@@ -53,6 +53,6 @@ if(mode==="--check"){
   if(!root)throw new Error("METROPLAT_WEB_DATA_DIR required for --record");
   const {recordMediaNeed}=await import("../src/media-demand-journal.mjs");
   const {id:providedId,...content}=source;
-  const receipt=recordMediaNeed({root,need:content,origin:source.source.issue??source.source.ref??source.source.publicAddress??"consumer-source"});
-  process.stdout.write(JSON.stringify({status:"RECORDED_NOT_READY",mediaNeed:receipt.mediaNeed,receipt})+"\n");
+  const record=recordMediaNeed({root,need:content,origin:source.source.issue??source.source.ref??source.source.publicAddress??"consumer-source"});
+  process.stdout.write(JSON.stringify({status:"RECORDED_NOT_READY",mediaNeed:record.mediaNeed,receipt: record})+"\n");
 }

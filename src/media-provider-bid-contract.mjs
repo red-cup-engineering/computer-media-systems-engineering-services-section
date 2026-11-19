@@ -6,7 +6,7 @@ const amount=(x,k)=>{if(!Number.isSafeInteger(x)||x<1)throw new TypeError(k+" mu
 const COST=new Set(["no-charge","quoted","unknown"]);
 
 /** Bid binds exactly one consumer demand, via a provider-owned Capability Market offerRef. */
-export function admitMediaProviderBid(x){
+export function validateMediaProviderBid(x){
   if(!obj(x)||x.type!=="MediaProviderBid"||x.version!==1)throw new TypeError("expected MediaProviderBid v1");
   const createdAt=instant(x.createdAt,"bid createdAt"),expiresAt=instant(x.expiresAt,"bid expiresAt");
   if(expiresAt<=createdAt)throw new TypeError("bid expiresAt must follow createdAt");
@@ -23,7 +23,7 @@ export function admitMediaProviderBid(x){
 }
 
 /** Only a consumer can issue an award, separately from a provider offer. */
-export function admitMediaCustomerAward(x){
+export function validateMediaCustomerAward(x){
   if(!obj(x)||x.type!=="MediaCustomerAward"||x.version!==1)throw new TypeError("expected MediaCustomerAward v1");
   return Object.freeze({
     type:"MediaCustomerAward",version:1,bid:name(x.bid,"selected bid"),
@@ -44,7 +44,7 @@ export function admitMediaCustomerAward(x){
  * Neither an eligible evaluation nor a hold is editorial acceptance/publication.
  */
 export function evaluateMediaAward({inbox,bid:rawBid,award:rawAward,now=new Date()}={}){
-  const bid=admitMediaProviderBid(rawBid),award=admitMediaCustomerAward(rawAward);
+  const bid=validateMediaProviderBid(rawBid),award=validateMediaCustomerAward(rawAward);
   const at=now instanceof Date?now:new Date(now);
   if(!Number.isFinite(at.getTime()))throw new TypeError("now must be an instant");
   if(!obj(inbox)||!Array.isArray(inbox.needs)||!Array.isArray(inbox.frontier)||!Array.isArray(inbox.allocations))

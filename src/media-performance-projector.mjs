@@ -31,26 +31,26 @@ function readAnalytics(path) {
  */
 export function projectYouTubeAnalyticsTree({ educationRoot, dataRoot } = {}) {
   const sourceRoot=resolve(educationRoot);
-  const custodyRoot=resolve(dataRoot);
+  const storageRoot=resolve(dataRoot);
   const files=analyticsFilesUnder(sourceRoot);
   const results=[];
   let rows=0, appended=0;
   for (const path of files) {
     const observations=readAnalytics(path);
     const relative=path.slice(sourceRoot.length+1).split("\\").join("/");
-    const receipt=recordMediaPerformanceObservations({
-      root:custodyRoot,
+    const record=recordMediaPerformanceObservations({
+      root:storageRoot,
       observations,
       origin:"public-education-analytics:"+relative,
     });
-    rows+=receipt.observations;
-    appended+=receipt.appended;
-    results.push(Object.freeze({path,observations:receipt.observations,appended:receipt.appended}));
+    rows+=record.observations;
+    appended+=record.appended;
+    results.push(Object.freeze({path,observations:record.observations,appended:record.appended}));
   }
   return Object.freeze({
     type:"YouTubeAnalyticsProjection",
     educationRoot:sourceRoot,
-    dataRoot:custodyRoot,
+    dataRoot:storageRoot,
     files:files.length,
     observations:rows,
     appended,

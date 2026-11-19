@@ -2,13 +2,13 @@
 import {canonicalJson} from "@red-cup-engineering/json-engine/canonical-json";
 import {createEvidenceJournal} from "@red-cup-engineering/semantic-record-journal-service";
 import {readMediaDemandInbox} from "./media-demand-journal.mjs";
-import {admitMediaProviderBid,prepareMediaAwardReservation} from "./media-provider-bid-contract.mjs";
+import {validateMediaProviderBid,prepareMediaAwardReservation} from "./media-provider-bid-contract.mjs";
 
 export const MEDIA_BID_OBJECT_KIND="media-provider-bid";
 const bids=root=>createEvidenceJournal({root,objectKind:MEDIA_BID_OBJECT_KIND});
 
 export function readMediaProviderBids({root,mediaNeed,purpose}={}){
-  const found=bids(root).query({category:"bid"}).map(row=>admitMediaProviderBid(row.record))
+  const found=bids(root).query({category:"bid"}).map(row=>validateMediaProviderBid(row.record))
     .filter(row=>(mediaNeed===undefined||row.mediaNeed===mediaNeed)&&(purpose===undefined||row.purpose===purpose));
   const byId=new Map();
   for(const bid of found){
@@ -21,7 +21,7 @@ export function readMediaProviderBids({root,mediaNeed,purpose}={}){
 
 /** Record one provider's work-specific offer, not an award or execution authority. */
 export function recordMediaProviderBid({root,bid,origin}={}){
-  const value=admitMediaProviderBid(bid);
+  const value=validateMediaProviderBid(bid);
   const inbox=readMediaDemandInbox({root,now:new Date(value.createdAt)});
   const need=inbox.needs.find(n=>n.id===value.mediaNeed);
   const item=need?.artifacts.find(a=>a.purpose===value.purpose);

@@ -41,7 +41,7 @@ export function proposeMediaNeedFromIssue(issue){
   if(!RIGHTS.has(rights))throw new TypeError("unsupported rights status");
   const purpose=required(fields,"Artifact purpose (stable key)");
   if(!/^[a-z][a-z0-9-]{1,63}$/u.test(purpose))throw new TypeError("artifact purpose must be stable kebab-case");
-  const disposition=rights==="Prohibited / do not generate"?"ineligible":
+  const decision=rights==="Prohibited / do not generate"?"ineligible":
     rights==="Unknown / needs review"?"hold":"conditional";
   const need={
     type:"MediaNeed",version:1,
@@ -60,8 +60,8 @@ export function proposeMediaNeedFromIssue(issue){
     },
     artifacts:[{
       capability,purpose,destination:required(fields,"Delivery destination or placement"),
-      priority:0,wanted:1,disposition,
-      ...(disposition==="conditional"?{condition:"independent owner, rights, reuse, reviewer and destination readiness"}:{})
+      priority:0,wanted:1,disposition: decision,
+      ...(decision==="conditional"?{condition:"independent owner, rights, reuse, reviewer and destination readiness"}:{})
     }]
   };
   return Object.freeze({type:"MediaRequirementProposal",status:"PROPOSED_NOT_ADMITTED",issue:issue.html_url,mediaNeedCandidate:need,

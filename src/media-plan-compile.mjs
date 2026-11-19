@@ -11,7 +11,7 @@
  * these outputs as data.
  */
 import {
-  admitMediaPlan, canonicalJson, hexFromNi, linkHref, mediaPlanId, niOf, planShots, resolveLink, sha256Hex, svgIsSelfContained,
+  validateMediaPlan, canonicalJson, hexFromNi, linkHref, mediaPlanId, niOf, planShots, resolveLink, sha256Hex, svgIsSelfContained,
 } from './media-plan.mjs';
 
 export const MEDIA_PLAN_CONTRACT_ID = 'compile-media-plan/1';
@@ -60,7 +60,7 @@ const END_CARD_LINK_WIDTH = 34;
 const END_CARD_LINK_LINES = 4;
 const frozen = (v) => Object.freeze(v);
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
-const refusal = (code, path, message) => frozen({ code, path, message });
+const rejection = (code, path, message) => frozen({ code, path, message });
 const esc = (value) => String(value).replace(/[&<>"']/gu, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[ch]);
 const frameMs = (frame, fps) => Math.round((frame * 1000) / fps);
 const wrap = (text, max, lines) => {
@@ -185,7 +185,7 @@ const shotSeconds = (plan, shot) => Math.max(shot.visual.minSeconds ?? 1, Math.c
  *   options.maxClipSeconds   longest clip the model makes (8 for Veo 3.1).
  */
 export function compileFlowOrders(plan, { model = DEFAULT_FLOW_MODEL, completions = [], maxClipSeconds = DEFAULT_MAX_CLIP_SECONDS } = {}) {
-  const refusals = []; const orders = []; const satisfied = []; const deterministicOnly = []; const warnings = [];
+  const rejections = []; const orders = []; const satisfied = []; const deterministicOnly = []; const warnings = [];
   const sources = plan.source.documents.filter((d) => d.identity).map((d) => frozen({ identity: d.identity, role: d.role }));
   const onFile = new Map();
   for (const c of completions) {
@@ -198,13 +198,13 @@ export function compileFlowOrders(plan, { model = DEFAULT_FLOW_MODEL, completion
     const path = `scenes[${plan.scenes.findIndex((s) => s.id === shot.sceneId)}].shots[${plan.scenes.find((s) => s.id === shot.sceneId).shots.findIndex((s) => s.id === shot.id)}]`;
     if (shot.visual.mode === 'deterministic') { deterministicOnly.push(shot.id); continue; }
     if (shot.visual.referenceImages?.length) {
-      refusals.push(refusal('REFERENCE_CONDITIONING_UNSUPPORTED', `${path}.visual.referenceImages`, 'the Flow wire client is text-to-video only; reference images cannot be silently dropped. Mark the shot deterministic or remove the references.'));
+      rejections.push(rejection('REFERENCE_CONDITIONING_UNSUPPORTED', `${path}.visual.referenceImages`, 'the Flow wire client is text-to-video only; reference images cannot be silently dropped. Mark the shot deterministic or remove the references.'));
       continue;
     }
     const seconds = shotSeconds(plan, shot);
     const prompt = shot.visual.prompt ?? assembleFlowPrompt(plan, shot, Math.max(seconds, maxClipSeconds));
     if (seconds > maxClipSeconds) {
-      refusals.push(refusal('SHOT_EXCEEDS_CLIP_LENGTH', `${path}.frames`, `shot needs ${seconds}s but a Flow clip is at most ${maxClipSeconds}s; split the shot`));
+      rejections.push(rejection('SHOT_EXCEEDS_CLIP_LENGTH', `${path}.frames`, `shot needs ${seconds}s but a Flow clip is at most ${maxClipSeconds}s; split the shot`));
       continue;
     }
     if (GENERATIVE_TEXT_REQUEST.test(prompt)) warnings.push(frozen({ code: 'GENERATIVE_TEXT_REQUEST', shotId: shot.id, message: 'the prompt asks the video model to draw text or labelled graphics; move them to a deterministic overlay asset (visual.assets, role overlay)' }));
@@ -226,8 +226,8 @@ export function compileFlowOrders(plan, { model = DEFAULT_FLOW_MODEL, completion
       orderId,
     }));
   }
-  if (!refusals.length && orders.length + satisfied.length === 0) refusals.push(refusal('NOTHING_TO_ORDER', 'scenes', 'every shot is deterministic-only; there is nothing for Flow to generate'));
-  return frozen({ orders: frozen(orders), satisfied: frozen(satisfied), deterministicOnly: frozen(deterministicOnly), warnings: frozen(warnings), refusals: frozen(refusals) });
+  if (!rejections.length && orders.length + satisfied.length === 0) rejections.push(rejection('NOTHING_TO_ORDER', 'scenes', 'every shot is deterministic-only; there is nothing for Flow to generate'));
+  return frozen({ orders: frozen(orders), satisfied: frozen(satisfied), deterministicOnly: frozen(deterministicOnly), warnings: frozen(warnings), refusals: frozen(rejections) });
 }
 
 // ---------------------------------------------------------------- deterministic
@@ -242,25 +242,25 @@ function endCardShotId(plan) {
 
 /** Compile the render job the procedural renderer consumes. */
 export function compileDeterministicRenderJob(plan) {
-  const refusals = []; const assets = []; const shots = [];
+  const rejections = []; const assets = []; const shots = [];
   const { outputFps } = plan.render;
-  if (plan.aspect !== '9:16') refusals.push(refusal('RENDERER_UNSUPPORTED', 'aspect', 'procedural-previs/1 only renders 9:16; a different aspect cannot be silently changed'));
+  if (plan.aspect !== '9:16') rejections.push(rejection('RENDERER_UNSUPPORTED', 'aspect', 'procedural-previs/1 only renders 9:16; a different aspect cannot be silently changed'));
   const shotCount = planShots(plan).length + (plan.endCard ? 1 : 0);
-  if (shotCount > 100) refusals.push(refusal('RENDERER_UNSUPPORTED', 'scenes', 'procedural-previs/1 accepts at most 100 total shots including the end card'));
+  if (shotCount > 100) rejections.push(rejection('RENDERER_UNSUPPORTED', 'scenes', 'procedural-previs/1 accepts at most 100 total shots including the end card'));
   for (const [si, scene] of plan.scenes.entries()) {
     for (const [hi, shot] of scene.shots.entries()) {
       const path = `scenes[${si}].shots[${hi}]`;
-      if (shot.characterIds.length > 5) refusals.push(refusal('RENDERER_UNSUPPORTED', `${path}.characterIds`, 'procedural-previs/1 accepts at most 5 characters per shot'));
-      if (shot.dialogue.length > 12) refusals.push(refusal('RENDERER_UNSUPPORTED', `${path}.dialogue`, 'procedural-previs/1 accepts at most 12 dialogue lines per shot'));
-      if (shot.visual.assets.filter((a) => a.role === 'frame').length > 1) refusals.push(refusal('RENDERER_UNSUPPORTED', `${path}.visual.assets`, 'procedural-previs/1 consumes one frame asset per shot; additional frames cannot be silently discarded'));
-      if ((shot.frames * outputFps) % plan.fps !== 0) refusals.push(refusal('TIMING_DRIFT', `${path}.frames`, `${shot.frames} frames at ${plan.fps} fps cannot be represented at ${outputFps} fps without drift`));
+      if (shot.characterIds.length > 5) rejections.push(rejection('RENDERER_UNSUPPORTED', `${path}.characterIds`, 'procedural-previs/1 accepts at most 5 characters per shot'));
+      if (shot.dialogue.length > 12) rejections.push(rejection('RENDERER_UNSUPPORTED', `${path}.dialogue`, 'procedural-previs/1 accepts at most 12 dialogue lines per shot'));
+      if (shot.visual.assets.filter((a) => a.role === 'frame').length > 1) rejections.push(rejection('RENDERER_UNSUPPORTED', `${path}.visual.assets`, 'procedural-previs/1 consumes one frame asset per shot; additional frames cannot be silently discarded'));
+      if ((shot.frames * outputFps) % plan.fps !== 0) rejections.push(rejection('TIMING_DRIFT', `${path}.frames`, `${shot.frames} frames at ${plan.fps} fps cannot be represented at ${outputFps} fps without drift`));
       shots.push({
         id: shot.id, beatId: shot.beatId ?? scene.id, frames: shot.frames, locationId: shot.locationId ?? 'unspecified',
         characterIds: [...shot.characterIds], ...(shot.camera ? { camera: shot.camera } : {}), action: shot.action,
         dialogue: shot.dialogue.map((d) => ({ speakerId: d.speakerId, startFrame: d.startFrame, endFrame: d.endFrame, text: d.text })),
       });
       for (const [ai, a] of shot.visual.assets.entries()) {
-        if (!a.svg) { refusals.push(refusal('ASSET_UNRESOLVED', `${path}.visual.assets[${ai}]`, 'the deterministic renderer needs the SVG inline; resolve the content address to bytes before compiling')); continue; }
+        if (!a.svg) { rejections.push(rejection('ASSET_UNRESOLVED', `${path}.visual.assets[${ai}]`, 'the deterministic renderer needs the SVG inline; resolve the content address to bytes before compiling')); continue; }
         assets.push(frozen({ shotId: shot.id, assetId: a.id, role: a.role, mediaType: a.mediaType, svg: a.svg, sha256: sha256Hex(a.svg), ...(a.producer ? { producer: a.producer } : {}) }));
       }
     }
@@ -268,15 +268,15 @@ export function compileDeterministicRenderJob(plan) {
   if (plan.endCard) {
     const locator = visibleLocator(selectedCardLink(plan));
     const paper = plan.links.map((l) => resolveLink(plan, l)).find((l) => l.rel === 'paper');
-    if (locatorLines(locator).length > END_CARD_LINK_LINES) refusals.push(refusal('ENDCARD_LINK_TOO_LONG', 'endCard.linkRel', `the complete locator does not fit the end card (${END_CARD_LINK_WIDTH * END_CARD_LINK_LINES} Unicode scalars); give the link a shorter complete URL or DOI`));
-    if (paper && locator !== visibleLocator(paper)) refusals.push(refusal('ENDCARD_PAPER_LINK_MISMATCH', 'endCard.linkRel', 'the selected end-card locator differs from the required paper locator'));
+    if (locatorLines(locator).length > END_CARD_LINK_LINES) rejections.push(rejection('ENDCARD_LINK_TOO_LONG', 'endCard.linkRel', `the complete locator does not fit the end card (${END_CARD_LINK_WIDTH * END_CARD_LINK_LINES} Unicode scalars); give the link a shorter complete URL or DOI`));
+    if (paper && locator !== visibleLocator(paper)) rejections.push(rejection('ENDCARD_PAPER_LINK_MISMATCH', 'endCard.linkRel', 'the selected end-card locator differs from the required paper locator'));
     const svg = endCardSvg(plan);
     const frames = plan.endCard.seconds * plan.fps;
     const cardShotId = endCardShotId(plan);
     shots.push({ id: cardShotId, beatId: 'end-card', frames, locationId: 'end-card', characterIds: [], action: 'End card with the source link', dialogue: [] });
     assets.push(frozen({ shotId: cardShotId, assetId: 'end-card-frame', role: 'frame', mediaType: 'image/svg+xml', svg, sha256: sha256Hex(svg), producer: frozen({ service: 'media-plan/end-card' }) }));
   }
-  if (refusals.length) return frozen({ job: null, refusals: frozen(refusals) });
+  if (rejections.length) return frozen({ job: null, refusals: frozen(rejections) });
   const cues = captionCues(plan, { includeEndCard: true });
   const totalFrames = shots.reduce((n, s) => n + s.frames, 0);
   const job = frozen({
@@ -298,7 +298,7 @@ export function compileDeterministicRenderJob(plan) {
 
 /** Compile publication metadata: description with the paper link, caption tracks, end-card link. */
 export function compilePublication(plan) {
-  const refusals = [];
+  const rejections = [];
   const links = plan.links.map((l) => resolveLink(plan, l));
   const lines = [];
   if (plan.publication.description) lines.push(plan.publication.description);
@@ -314,7 +314,7 @@ export function compilePublication(plan) {
   if (others.length) lines.push(others.map((l) => `${l.label ?? l.rel}: ${linkHref(l)}`).join('\n'));
   if (plan.publication.aiDisclosure) lines.push(plan.publication.aiDisclosure);
   const description = lines.join('\n\n');
-  if (Buffer.byteLength(description, 'utf8') > 5000) refusals.push(refusal('DESCRIPTION_TOO_LONG', 'publication.description', 'the composed description exceeds 5000 bytes'));
+  if (Buffer.byteLength(description, 'utf8') > 5000) rejections.push(rejection('DESCRIPTION_TOO_LONG', 'publication.description', 'the composed description exceeds 5000 bytes'));
   const cues = captionCues(plan, { includeEndCard: true });
   const publication = frozen({
     title: plan.publication.title, description, tags: frozen([...plan.publication.tags]), privacy: plan.publication.privacy,
@@ -326,7 +326,7 @@ export function compilePublication(plan) {
     captionTracks: frozen(cues.length ? [frozen({ language: plan.language, format: 'vtt', sha256: sha256Hex(renderVtt(cues)) })] : []),
     ...(plan.endCard ? { endCard: frozen({ seconds: plan.endCard.seconds, linkRel: plan.endCard.linkRel }) } : {}),
   });
-  return frozen({ publication, refusals: frozen(refusals) });
+  return frozen({ publication, refusals: frozen(rejections) });
 }
 
 // ---------------------------------------------------------------- contract entry point
@@ -379,37 +379,37 @@ function postconditions(plan, outputs) {
  *   options.targets   defaults to plan.render.targets; each must be planned (render.targets).
  */
 export function compileMediaPlan(input, options = {}) {
-  const admitted = admitMediaPlan(input);
-  if (!admitted.ok) return frozen({ ok: false, refusals: admitted.refusals });
-  const plan = admitted.plan;
-  const refusals = [];
-  if (!isObject(options)) return frozen({ ok: false, refusals: frozen([refusal('FIELD_OBJECT', 'options', 'compile options must be an object')]) });
+  const validated = validateMediaPlan(input);
+  if (!validated.ok) return frozen({ ok: false, refusals: validated.refusals });
+  const plan = validated.plan;
+  const rejections = [];
+  if (!isObject(options)) return frozen({ ok: false, refusals: frozen([rejection('FIELD_OBJECT', 'options', 'compile options must be an object')]) });
   const targets = options.targets === undefined ? plan.render.targets : options.targets;
-  if (!Array.isArray(targets) || targets.length === 0 || new Set(targets).size !== targets.length || targets.some((t) => typeof t !== 'string')) refusals.push(refusal('FIELD_ARRAY', 'options.targets', 'targets must be a nonempty array of unique target names'));
-  if (options.model !== undefined && (typeof options.model !== 'string' || !options.model.trim())) refusals.push(refusal('FIELD_TEXT', 'options.model', 'model must be nonempty text'));
-  if (options.maxClipSeconds !== undefined && (!Number.isSafeInteger(options.maxClipSeconds) || options.maxClipSeconds < 1)) refusals.push(refusal('FIELD_INTEGER', 'options.maxClipSeconds', 'maxClipSeconds must be a positive safe integer'));
-  if (options.completions !== undefined && !Array.isArray(options.completions)) refusals.push(refusal('FIELD_ARRAY', 'options.completions', 'completions must be an array of journal records'));
-  if (refusals.length) return frozen({ ok: false, refusals: frozen(refusals) });
-  for (const t of targets) if (!plan.render.targets.includes(t)) refusals.push(refusal('TARGET_NOT_PLANNED', 'render.targets', `target ${t} is not among the plan's render.targets`));
-  if (refusals.length) return frozen({ ok: false, refusals: frozen(refusals) });
+  if (!Array.isArray(targets) || targets.length === 0 || new Set(targets).size !== targets.length || targets.some((t) => typeof t !== 'string')) rejections.push(rejection('FIELD_ARRAY', 'options.targets', 'targets must be a nonempty array of unique target names'));
+  if (options.model !== undefined && (typeof options.model !== 'string' || !options.model.trim())) rejections.push(rejection('FIELD_TEXT', 'options.model', 'model must be nonempty text'));
+  if (options.maxClipSeconds !== undefined && (!Number.isSafeInteger(options.maxClipSeconds) || options.maxClipSeconds < 1)) rejections.push(rejection('FIELD_INTEGER', 'options.maxClipSeconds', 'maxClipSeconds must be a positive safe integer'));
+  if (options.completions !== undefined && !Array.isArray(options.completions)) rejections.push(rejection('FIELD_ARRAY', 'options.completions', 'completions must be an array of journal records'));
+  if (rejections.length) return frozen({ ok: false, refusals: frozen(rejections) });
+  for (const t of targets) if (!plan.render.targets.includes(t)) rejections.push(rejection('TARGET_NOT_PLANNED', 'render.targets', `target ${t} is not among the plan's render.targets`));
+  if (rejections.length) return frozen({ ok: false, refusals: frozen(rejections) });
   const planIdentity = mediaPlanId(plan);
   const outputs = { flow: null, deterministic: null, publication: null };
   const warnings = [];
   if (targets.includes('flow')) {
     const flow = compileFlowOrders(plan, { model: options.model, completions: options.completions, maxClipSeconds: options.maxClipSeconds });
-    refusals.push(...flow.refusals); warnings.push(...flow.warnings);
+    rejections.push(...flow.refusals); warnings.push(...flow.warnings);
     outputs.flow = { orders: flow.orders, satisfied: flow.satisfied, deterministicOnly: flow.deterministicOnly };
   }
   if (targets.includes('deterministic')) {
     const det = compileDeterministicRenderJob(plan);
-    refusals.push(...det.refusals); outputs.deterministic = det.job;
+    rejections.push(...det.refusals); outputs.deterministic = det.job;
   }
   const pub = compilePublication(plan);
-  refusals.push(...pub.refusals); outputs.publication = pub.publication;
-  if (refusals.length) return frozen({ ok: false, refusals: frozen(refusals) });
+  rejections.push(...pub.refusals); outputs.publication = pub.publication;
+  if (rejections.length) return frozen({ ok: false, refusals: frozen(rejections) });
   const checks = postconditions(plan, outputs);
-  if (checks.some((c) => !c.ok)) return frozen({ ok: false, refusals: frozen([refusal('POSTCONDITION_FAILED', '', `postconditions failed: ${checks.filter((c) => !c.ok).map((c) => c.name).join(', ')}`)]) });
-  const receipt = frozen({
+  if (checks.some((c) => !c.ok)) return frozen({ ok: false, refusals: frozen([rejection('POSTCONDITION_FAILED', '', `postconditions failed: ${checks.filter((c) => !c.ok).map((c) => c.name).join(', ')}`)]) });
+  const record = frozen({
     type: 'MediaPlanCompilationReceipt', version: 1, contract: MEDIA_PLAN_CONTRACT_ID, effects: 'none',
     planId: planIdentity, planSlug: plan.id, targets: frozen([...targets].sort()),
     options: frozen({ model: options.model ?? DEFAULT_FLOW_MODEL, maxClipSeconds: options.maxClipSeconds ?? DEFAULT_MAX_CLIP_SECONDS,
@@ -418,24 +418,24 @@ export function compileMediaPlan(input, options = {}) {
     outputId: niOf(canonicalJson(outputs)),
     outputs: frozen(outputs),
   });
-  return frozen({ ok: true, receipt });
+  return frozen({ ok: true, receipt: record });
 }
 
 /**
  * POSTCONDITION audit for a receiving party: recompile the plan under the receipt's own
  * options and show the receipt names exactly what the plan compiles to. Pure.
  */
-export function verifyCompilationReceipt(input, receipt, { completions = [] } = {}) {
-  if (!isObject(receipt) || receipt.type !== 'MediaPlanCompilationReceipt' || receipt.contract !== MEDIA_PLAN_CONTRACT_ID) return frozen({ ok: false, reason: 'not a compile-media-plan/1 receipt' });
-  if (!isObject(receipt.options) || !Array.isArray(receipt.targets)
-    || !Object.hasOwn(receipt.options, 'model') || !Object.hasOwn(receipt.options, 'maxClipSeconds')
-    || !Array.isArray(receipt.options.completionsConsulted)) return frozen({ ok: false, reason: 'receipt options and targets are required' });
-  const again = compileMediaPlan(input, { targets: receipt.targets, model: receipt.options.model, maxClipSeconds: receipt.options.maxClipSeconds, completions });
+export function verifyCompilationRecord(input, record, { completions = [] } = {}) {
+  if (!isObject(record) || record.type !== 'MediaPlanCompilationReceipt' || record.contract !== MEDIA_PLAN_CONTRACT_ID) return frozen({ ok: false, reason: 'not a compile-media-plan/1 receipt' });
+  if (!isObject(record.options) || !Array.isArray(record.targets)
+    || !Object.hasOwn(record.options, 'model') || !Object.hasOwn(record.options, 'maxClipSeconds')
+    || !Array.isArray(record.options.completionsConsulted)) return frozen({ ok: false, reason: 'receipt options and targets are required' });
+  const again = compileMediaPlan(input, { targets: record.targets, model: record.options.model, maxClipSeconds: record.options.maxClipSeconds, completions });
   if (!again.ok) return frozen({ ok: false, reason: 'plan no longer compiles', refusals: again.refusals });
   // Every carried field is authoritative to a receiver, including warnings and checks.
   // Canonical comparison tolerates key order, not omissions, changed metadata or extra fields.
   let ok = false;
-  try { ok = canonicalJson(receipt) === canonicalJson(again.receipt); }
+  try { ok = canonicalJson(record) === canonicalJson(again.receipt); }
   catch { return frozen({ ok: false, reason: 'receipt must be canonical JSON data' }); }
   return frozen({ ok, reason: ok ? null : 'receipt does not match the complete recompilation (plan, options, checks, warnings or outputs differ)' });
 }

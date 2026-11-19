@@ -17,13 +17,13 @@ export function reconcileFlowMediaAllocations({ root, flow = googleFlow, now = n
     if(!current) { transitions.push({allocation:artifact.allocation,status:"unmatched-provider-allocation"}); continue; }
     if(artifact.mediaNeed && artifact.mediaNeed!==current.mediaNeed) { transitions.push({allocation:artifact.allocation,status:"lineage-mismatch",field:"mediaNeed"}); continue; }
     if(artifact.purpose && artifact.purpose!==current.purpose) { transitions.push({allocation:artifact.allocation,status:"lineage-mismatch",field:"purpose"}); continue; }
-    const write=(state,receipt,recordedAt)=>{
+    const write=(state,record,recordedAt)=>{
       const result=recordMediaAllocationState({
         root,allocation:current.allocation,mediaNeed:current.mediaNeed,purpose:current.purpose,count:current.count,
-        state,provider:current.provider,at:recordedAt,receipt,origin:"@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section",
+        state,provider:current.provider,at:recordedAt,receipt: record,origin:"@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section",
       });
-      current={...current,state,recordedAt,receipt};latest.set(current.allocation,current);
-      transitions.push({allocation:current.allocation,state,appended:result.appended,receipt});
+      current={...current,state,recordedAt,receipt: record};latest.set(current.allocation,current);
+      transitions.push({allocation:current.allocation,state,appended:result.appended,receipt: record});
     };
     if(current.state==="held" && ["generated","delivered","public-use"].includes(artifact.custody)) {
       write("generated",artifact.completionId,at(artifact.generatedAt,now));

@@ -1,6 +1,6 @@
 import { shareAllowance } from "@red-cup-engineering/organizing/enterprise";
-import {admitMediaNeed} from "./media-need-contract.mjs";
-export {admitMediaNeed} from "./media-need-contract.mjs";
+import {validateMediaNeed} from "./media-need-contract.mjs";
+export {validateMediaNeed} from "./media-need-contract.mjs";
 
 const artifactKey=(need,artifact)=>`${need.id}#${artifact.purpose}`;
 export function mediaDemandFrontier(needs,{readiness={},receivers={},now=new Date()}={}) {
@@ -8,7 +8,7 @@ export function mediaDemandFrontier(needs,{readiness={},receivers={},now=new Dat
   if (!Number.isFinite(at.getTime())) throw new TypeError("frontier now must be an instant");
   const rows=[];
   for (const raw of needs??[]) {
-    const need=admitMediaNeed(raw);
+    const need=validateMediaNeed(raw);
     const expired=need.expiresAt && Date.parse(need.expiresAt)<=at.getTime();
     for (const artifact of need.artifacts) {
       const key=artifactKey(need,artifact);

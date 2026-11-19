@@ -58,7 +58,7 @@ const milliseconds=value=>{
 };
 
 /** Pure semantic preflight on actual standard OTIO, not another file format. */
-export function admitOtioVideoCuts({edit,sourceMedia,frameRate=30,width=1280,height=720}={}){
+export function validateOtioVideoCuts({edit,sourceMedia,frameRate=30,width=1280,height=720}={}){
  requireValid(edit?.OTIO_SCHEMA==='Timeline.1'&&
   edit.tracks?.OTIO_SCHEMA==='Stack.1'&&
   Array.isArray(edit.tracks.children)&&edit.tracks.children.length===1&&
@@ -133,7 +133,7 @@ export async function renderOtioVideoCuts({
   'OTIO source must be a bounded regular file');
  const editBytes=await readFile(editPath);
  const edit=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(editBytes));
- const plan=admitOtioVideoCuts({edit,sourceMedia,frameRate,width,height});
+ const plan=validateOtioVideoCuts({edit,sourceMedia,frameRate,width,height});
  const output=resolve(outputPath),otioReal=await realpath(editPath);
  requireValid(output!==otioReal,'Output cannot overwrite original OTIO source');
  const byPath=new Map(),sourceOrder=[];

@@ -26,7 +26,7 @@ async function educationSurface(injected){
 
 /** A missing installed channel worktree is unavailable publishing capacity,
  * never a successful zero-work media turn. */
-function admittedChannelIds(education){
+function validatedChannelIds(education){
   if(typeof education.channelIds!=="function")return null;
   const ids=education.channelIds();
   return Array.isArray(ids)&&ids.length>0&&ids.every(id=>typeof id==="string"&&id.length>0)?ids:null;
@@ -49,7 +49,7 @@ function shortPublishAt(parentPublishAt){
 export async function projectEducationShortDemand({root,education:injected,env=process.env,now=new Date()}={}){
   const education=await educationSurface(injected);
   if(!education || typeof education.channelIds!=="function" || typeof education.loadChannel!=="function") return Object.freeze({type:"EducationShortDemandProjection",status:"blocked",reason:"public-education-short-surface-not-released",opened:Object.freeze([])});
-  const channels=admittedChannelIds(education);
+  const channels=validatedChannelIds(education);
   if(!channels)return Object.freeze({type:"EducationShortDemandProjection",status:"blocked",reason:"no-admitted-education-channels",opened:Object.freeze([])});
   education.loadEnvironment?.();
   const opened=[],skipped=[];
@@ -116,7 +116,7 @@ async function invokeShort(education,generation,lineage){
 export async function dispatchEducationShortProbe({root,education:injected,now=new Date()}={}){
   const education=await educationSurface(injected);
   if(!education || typeof education.produceShortForChannel!=="function") return Object.freeze({type:"EducationShortProbe",status:"blocked",reason:"public-education-short-operation-not-released"});
-  if(!admittedChannelIds(education))return Object.freeze({type:"EducationShortProbe",status:"blocked",reason:"no-admitted-education-channels"});
+  if(!validatedChannelIds(education))return Object.freeze({type:"EducationShortProbe",status:"blocked",reason:"no-admitted-education-channels"});
   const allocations=readMediaAllocationStates({root}).filter(row=>row.provider===PROVIDER&&row.purpose===PURPOSE);
   // A generated Short may be awaiting a resumable upload or a confirmed
   // schedule. Neither generation nor a lost provider reply is delivery.
@@ -180,7 +180,7 @@ export async function dispatchEducationShortProbe({root,education:injected,now=n
 export async function reconcileEducationShorts({root,education:injected,now=new Date()}={}){
   const education=await educationSurface(injected);
   if(!education || typeof education.channelIds!=="function")return Object.freeze({type:"EducationShortReconciliation",status:"blocked",reason:"public-education-short-surface-not-released",transitions:Object.freeze([])});
-  const channels=admittedChannelIds(education);
+  const channels=validatedChannelIds(education);
   if(!channels)return Object.freeze({type:"EducationShortReconciliation",status:"blocked",reason:"no-admitted-education-channels",transitions:Object.freeze([])});
   education.loadEnvironment?.();
   const latest=new Map(readMediaAllocationStates({root}).map(row=>[row.allocation,row]));

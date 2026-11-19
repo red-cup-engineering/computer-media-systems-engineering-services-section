@@ -64,7 +64,7 @@ function koiosCandidate(root,now){
   });
 }
 
-export function mediaChannelCandidateReadout({repositoryRoot=process.env.METROPLAT_REPOSITORY_ROOT,root,env=process.env,now=new Date()}={}){
+export function mediaChannelCandidateReport({repositoryRoot=process.env.METROPLAT_REPOSITORY_ROOT,root,env=process.env,now=new Date()}={}){
   if(typeof repositoryRoot!=="string"||!repositoryRoot) throw new TypeError("METROPLAT_REPOSITORY_ROOT is required");
   if(typeof root!=="string"||!root) throw new TypeError("shared media data root is required");
   const candidates=[climateCandidate(repositoryRoot),paceCandidate(env),koiosCandidate(root,now)];

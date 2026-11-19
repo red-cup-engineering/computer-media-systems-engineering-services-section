@@ -66,7 +66,7 @@ const deepFreeze = (v) => {
   return v;
 };
 
-class Refusals {
+class Rejections {
   constructor() { this.list = []; }
   add(code, path, message) { this.list.push(Object.freeze({ code, path, message })); }
   closed(value, path, fields) {
@@ -110,7 +110,7 @@ export function svgIsSelfContained(svg) {
   return isMediaInertSvg(svg);
 }
 
-function admitLocator(r, value, path, { requireOne = true } = {}) {
+function validateLocator(r, value, path, { requireOne = true } = {}) {
   const out = {};
   if (value.identity !== undefined) { if (isNi(value.identity)) out.identity = value.identity; else r.add('LOCATOR_IDENTITY', `${path}.identity`, 'identity must be an exact sha-256 NI (ni:///sha-256;...)'); }
   if (value.url !== undefined) { if (typeof value.url === 'string' && URL_HTTPS.test(value.url) && value.url.length <= 2000) out.url = value.url; else r.add('LOCATOR_URL', `${path}.url`, 'url must be an https URL'); }
@@ -119,7 +119,7 @@ function admitLocator(r, value, path, { requireOne = true } = {}) {
   return out;
 }
 
-function admitCues(r, cues, path, frames, cast, { speaker }) {
+function validateCues(r, cues, path, frames, cast, { speaker }) {
   if (cues === undefined) return [];
   if (!Array.isArray(cues) || cues.length > 64) { r.add('FIELD_ARRAY', path, 'must be an array of at most 64 cues'); return []; }
   return cues.map((cue, i) => {
@@ -140,7 +140,7 @@ function admitCues(r, cues, path, frames, cast, { speaker }) {
   }).filter(Boolean);
 }
 
-function admitShot(r, raw, path, ctx) {
+function validateShot(r, raw, path, ctx) {
   if (!isObject(raw)) { r.add('FIELD_OBJECT', path, 'shot must be an object'); return null; }
   r.closed(raw, path, ['id', 'beatId', 'locationId', 'frames', 'characterIds', 'camera', 'action', 'claim', 'ambience', 'dialogue', 'captions', 'visual']);
   const shot = {};
@@ -167,8 +167,8 @@ function admitShot(r, raw, path, ctx) {
   if (raw.camera !== undefined) shot.camera = r.text(raw.camera, `${path}.camera`, { max: 1000 });
   shot.action = r.text(raw.action, `${path}.action`, { max: 4000 });
   if (raw.claim !== undefined) shot.claim = r.text(raw.claim, `${path}.claim`, { max: 4000 });
-  shot.dialogue = admitCues(r, raw.dialogue, `${path}.dialogue`, shot.frames ?? 1, shot.characterIds, { speaker: true });
-  shot.captions = admitCues(r, raw.captions, `${path}.captions`, shot.frames ?? 1, null, { speaker: false });
+  shot.dialogue = validateCues(r, raw.dialogue, `${path}.dialogue`, shot.frames ?? 1, shot.characterIds, { speaker: true });
+  shot.captions = validateCues(r, raw.captions, `${path}.captions`, shot.frames ?? 1, null, { speaker: false });
   if (raw.ambience !== undefined) shot.ambience = r.text(raw.ambience, `${path}.ambience`, { max: 1000 });
 
   const v = raw.visual === undefined ? {} : raw.visual;
@@ -239,8 +239,8 @@ function admitShot(r, raw, path, ctx) {
  * PRECONDITION. Admit a media plan.
  * Answers {ok:true, plan} with a frozen, default-filled plan, or {ok:false, refusals}.
  */
-export function admitMediaPlan(input) {
-  const r = new Refusals();
+export function validateMediaPlan(input) {
+  const r = new Rejections();
   if (!isObject(input)) return Object.freeze({ ok: false, refusals: Object.freeze([Object.freeze({ code: 'PLAN_NOT_OBJECT', path: '', message: 'a media plan is a JSON object' })]) });
   r.closed(input, '', ['kind', 'version', 'id', 'title', 'language', 'consumer', 'purpose', 'destination', 'promptRevision', 'aspect', 'fps', 'source', 'links', 'characters', 'locations', 'beats', 'scenes', 'audio', 'captions', 'endCard', 'render', 'publication']);
   if (input.kind !== MEDIA_PLAN_KIND) r.add('PLAN_KIND', 'kind', `kind must be ${MEDIA_PLAN_KIND}`);
@@ -271,7 +271,7 @@ export function admitMediaPlan(input) {
     r.closed(d, p, ['id', 'role', 'title', 'rightsRef', 'citation', 'identity', 'url', 'doi']);
     const out = { id: r.slug(d.id, `${p}.id`), role: r.slug(d.role, `${p}.role`) };
     if (out.id) { if (docIds.has(out.id)) r.add('DUPLICATE_ID', `${p}.id`, `document ${out.id} is repeated`); docIds.add(out.id); }
-    const loc = admitLocator(r, d, p);
+    const loc = validateLocator(r, d, p);
     if (!loc.identity && !loc.url && !loc.doi) r.list.splice(r.list.findIndex((x) => x.path === p && x.code === 'LOCATOR_MISSING'), 1, Object.freeze({ code: 'SOURCE_DOCUMENT_UNADDRESSED', path: p, message: 'a source document needs identity (NI), url or doi so the plan can be traced to it' }));
     Object.assign(out, loc);
     for (const f of ['title', 'rightsRef', 'citation']) if (d[f] !== undefined) out[f] = r.text(d[f], `${p}.${f}`, { max: 1000 });
@@ -290,7 +290,7 @@ export function admitMediaPlan(input) {
       out.documentId = r.slug(l.documentId, `${p}.documentId`);
       if (out.documentId && !docIds.has(out.documentId)) r.add('UNKNOWN_DOCUMENT', `${p}.documentId`, `document ${out.documentId} is not in source.documents`);
     }
-    Object.assign(out, admitLocator(r, l, p, { requireOne: out.documentId === undefined }));
+    Object.assign(out, validateLocator(r, l, p, { requireOne: out.documentId === undefined }));
     if (l.label !== undefined) out.label = r.text(l.label, `${p}.label`, { max: 200 });
     return out;
   }).filter(Boolean);
@@ -349,7 +349,7 @@ export function admitMediaPlan(input) {
     if (s.title !== undefined) out.title = r.text(s.title, `${p}.title`, { max: 200 });
     const shots = Array.isArray(s.shots) ? s.shots : (r.add('FIELD_ARRAY', `${p}.shots`, 'a scene needs shots'), []);
     if (shots.length < 1 || shots.length > 100) r.add('FIELD_ARRAY', `${p}.shots`, '1 to 100 shots per scene');
-    out.shots = shots.slice(0, 100).map((shot, j) => admitShot(r, shot, `${p}.shots[${j}]`, ctx)).filter(Boolean);
+    out.shots = shots.slice(0, 100).map((shot, j) => validateShot(r, shot, `${p}.shots[${j}]`, ctx)).filter(Boolean);
     return out;
   }).filter(Boolean);
 

@@ -4,7 +4,7 @@
  * proposed MediaNeed only after the CONSUMING service supplies the actual
  * media brief. This projection neither authorizes rights nor procures a model.
  */
-import {admitMediaNeed} from "./media-need-contract.mjs";
+import {validateMediaNeed} from "./media-need-contract.mjs";
 const record=x=>x!==null&&typeof x==="object"&&!Array.isArray(x);
 const required=(v,name)=>{
   if(typeof v!=="string"||!v.trim())throw new TypeError(name+" is required");
@@ -65,7 +65,7 @@ export function proposeMediaNeedFromRequirement({requirement,brief,sourcePath}={
   };
   // Shared canonical admission checks artifact key uniqueness, types, bounds.
   // The temporary validation id must never masquerade as a journal identity.
-  admitMediaNeed({...candidate,id:"unrecorded-projection"});
+  validateMediaNeed({...candidate,id:"unrecorded-projection"});
   return Object.freeze({
     type:"MediaRequirementProjection",status:"PROPOSED_NOT_ADMITTED",
     originalRequirement:id,

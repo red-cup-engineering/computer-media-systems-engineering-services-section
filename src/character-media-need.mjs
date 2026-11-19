@@ -1,4 +1,4 @@
-import { admitMediaNeed } from './media-need-contract.mjs';
+import { validateMediaNeed } from './media-need-contract.mjs';
 
 const mediumCapability = Object.freeze({
   'one-panel-cartoon': 'image-generation',
@@ -42,7 +42,7 @@ export function proposeCharacterMediaNeed({ scene, commission } = {}) {
       character: { actorId, sceneId, medium, observationId: scene.observationId },
     };
   });
-  const need = admitMediaNeed({
+  const need = validateMediaNeed({
     type: 'MediaNeed', version: 1, id: `character-scene:${sceneId}`,
     consumer, objective, openedAt,
     source: { actorId, sceneId, observationId: scene.observationId,

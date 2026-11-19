@@ -25,7 +25,7 @@ const relativePath=(v)=>{
   return path;
 };
 
-export function admitAcceptedMediaAsset({asset,distribution}={}){
+export function validateAcceptedMediaAsset({asset,distribution}={}){
   if(!asset||typeof asset!=="object"||Array.isArray(asset))
     throw new TypeError("accepted review requires asset");
   const sha256=nonempty(asset.sha256,"asset sha256").toLowerCase();

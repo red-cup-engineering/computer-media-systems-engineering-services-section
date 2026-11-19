@@ -2,7 +2,7 @@
 // CLI for a consumer-accepted POD release. No public issue webhook may invoke 'stage'.
 import { readFileSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
-import { qualifyPrintifyRelease, stagePrintifyDraft } from '../src/pod-printify.mjs';
+import { validatePrintifyRelease, stagePrintifyDraft } from '../src/pod-printify.mjs';
 
 async function main() {
   const [mode, path] = process.argv.slice(2);
@@ -14,8 +14,8 @@ async function main() {
   if(!filename.startsWith(root+sep)) throw new TypeError('release file must be within repository');
   const release=JSON.parse(readFileSync(filename,'utf8'));
   if(mode==='check'){
-    const qualification=qualifyPrintifyRelease(release);
-    console.log(JSON.stringify({type:'PrintifyDraftQualification',state:'ready-for-independent-approval',marker:qualification.marker,shopId:qualification.provider.shopId,placements:qualification.placements.length}));
+    const validation=validatePrintifyRelease(release);
+    console.log(JSON.stringify({type:'PrintifyDraftQualification',state:'ready-for-independent-approval',marker:validation.marker,shopId:validation.provider.shopId,placements:validation.placements.length}));
     return;
   }
   const outcome=await stagePrintifyDraft({raw:release,root,token:process.env.PRINTIFY_TOKEN,shopId:process.env.PRINTIFY_SHOP_ID});

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, realpathSync, statSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
-import { admitAcceptedMediaAsset } from './media-accepted-asset-contract.mjs';
+import { validateAcceptedMediaAsset } from './media-accepted-asset-contract.mjs';
 
 const text = (value, field) => {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${field} must be nonempty`);
@@ -24,7 +24,7 @@ const finite = (value, field) => {
 const digestOf = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
 // Validate handoff data. Referenced approvals must be verified by independent receiving authority.
-export function qualifyPrintifyRelease(raw) {
+export function validatePrintifyRelease(raw) {
   if (!raw || raw.type !== 'AcceptedPODProduct' || raw.version !== 1)
     throw new TypeError('requires AcceptedPODProduct version 1; creative proposals cannot be staged');
   if (raw.state !== 'accepted-for-provider-draft')
@@ -58,7 +58,7 @@ export function qualifyPrintifyRelease(raw) {
   const placements = raw.placements.map((p, index) => {
     const position = text(p?.position, `placement ${index} position`);
     if (!/^[a-z][a-z0-9_-]*$/u.test(position)) throw new TypeError('invalid Printify position');
-    const accepted = admitAcceptedMediaAsset({ asset: p?.asset }).asset;
+    const accepted = validateAcceptedMediaAsset({ asset: p?.asset }).asset;
     if (accepted.mimeType !== 'image/png') throw new TypeError('Printify print artwork must be accepted PNG; mockups do not qualify');
     const x = finite(p.x, 'image x'), y = finite(p.y, 'image y');
     const scale = finite(p.scale, 'image scale'), angle = finite(p.angle, 'image angle');
@@ -141,7 +141,7 @@ async function findExisting({fetch,token,shopId,marker}) {
 
 // Stage a provider-side draft, never a public listing or physical order.
 export async function stagePrintifyDraft({raw,root,token,shopId,fetch=globalThis.fetch}) {
-  const release = qualifyPrintifyRelease(raw);
+  const release = validatePrintifyRelease(raw);
   const credential = text(token,'PRINTIFY_TOKEN');
   const suppliedShopId = integer(Number(shopId),'PRINTIFY_SHOP_ID');
   if(suppliedShopId !== release.provider.shopId) throw new Error('connected shop differs from accepted product receiving shop');
