@@ -1,0 +1,39 @@
+name: Native OTIO video renderer receiving
+on:
+  pull_request:
+    paths:
+      - 'src/otio-render.mjs'
+      - 'test/otio-render*.test.mjs'
+      - 'package.json'
+      - '.github/workflows/otio-render-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/otio-render.mjs'
+      - 'test/otio-render*.test.mjs'
+      - 'package.json'
+      - '.github/workflows/otio-render-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  receive-actual-video-cuts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Install actual FFmpeg and FFprobe for independent decoded-video receiving
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version
+          ffprobe -version
+      - name: Parse original media producer and run source plus actual film receiving
+        run: |
+          node --check src/otio-render.mjs
+          node --test test/otio-render.test.mjs test/otio-render-integration.test.mjs

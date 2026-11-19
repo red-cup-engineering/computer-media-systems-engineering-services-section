@@ -1,0 +1,13 @@
+{
+  "id": "github-cli-token-invalid-and-rest-quota-exhausted-on-this-laptop",
+  "kind": "system-debt",
+  "system": "gh CLI on the laptop (config at ~/.config/gh/hosts.yml; no secret recorded here)",
+  "owning-section": "561-group-services-section",
+  "breaks-requirements": [],
+  "evidence": "2026-10-25 00:15 UTC: gh auth status reported the stored token invalid for emsenn, and the REST core quota (5000/hour, shared by every agent on the account) was exhausted until about 00:32 UTC; graphql calls still succeeded. Cloning over https needed no token.",
+  "repair": "Owner re-authenticates gh (gh auth login) and a quota-aware wrapper keeps agents from exhausting the shared budget.",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}

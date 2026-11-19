@@ -1,0 +1,15 @@
+{
+  "id": "education-short-producer-writes-order-lines-not-media-plans",
+  "kind": "system-debt",
+  "system": "public-education-services-section short producer (prompt assembly education-flow/2) and its Flow order lines",
+  "owning-section": "public-education-services-section",
+  "breaks-requirements": [
+    "one-media-plan-drives-every-renderer"
+  ],
+  "evidence": "2026-10-25: orders/pending and orders/review on cold-red-gate hold hand-assembled lines (consumer education-short--<series>--<lesson>--<angle>, promptAssembly education-flow/2). The held review-queue order education-short--climate-place-by-place--miami--misconception asks the video model to draw labelled text ('labeled Misconception: Certainty', 'Text overlays appear') while the same prompt says 'No generated lettering'; the plan compiler flags this as GENERATIVE_TEXT_REQUEST. The repository was not cloned: causeway-services/public-education-services-section was only listed by git ls-remote.",
+  "repair": "The education short producer emits a MediaPlan (claim as shot.claim, lesson report as a source document, caption as shot.captions, graphics as SVG overlay assets) and calls compileMediaPlan; its direct order-line writer is retired.",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}

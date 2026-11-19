@@ -1,0 +1,15 @@
+{
+  "id": "procedural-renderer-limits-music-none-voice-and-reproducibility",
+  "kind": "system-debt",
+  "system": "services/public-fiction-media-services-section/apps/previsualize-microdrama.mjs",
+  "owning-section": "media-engineering-services-section",
+  "breaks-requirements": [
+    "one-media-plan-drives-every-renderer"
+  ],
+  "evidence": "2026-10-25: audio.music.profile none is refused (RENDERER_UNSUPPORTED) because the renderer always lays a score; voice rehearsal needs espeak, which is not installed on this laptop; a 51-second 360x640 render took about 100 seconds here; byte reproducibility depends on the pinned ffmpeg 6.1.1, libx264, librsvg and DejaVu Sans, which the render receipt records but does not pin.",
+  "repair": "Honour music none with a silent track, install or containerize the toolchain used for canonical renders, and compare preview SHA-256 across hosts before relying on byte identity.",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}

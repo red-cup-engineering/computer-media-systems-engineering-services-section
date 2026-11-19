@@ -1,0 +1,41 @@
+{
+  "id": "one-media-plan-drives-every-renderer",
+  "name": "One media plan drives every renderer",
+  "kind": "requirement",
+  "raised-by": "emsenn",
+  "asks": "one shared upstream contract and code that both Google Flow video production and the deterministically generated microdrama/micro-serial videos consume",
+  "tier": "strategic",
+  "met-when": [
+    {
+      "cell": "one-media-plan-drives-every-renderer:one-schema",
+      "target": "held",
+      "says": "A JSON-Schema'd MediaPlan (script, scenes, shots, assets, captions, audio, render target, publication metadata, source provenance, links to paper) exists in computer-media-engineering-services-section and is the only input shape the Flow order compiler and the deterministic render compiler accept. Executable admission enforces the declared closed object shapes and distinguishes absent defaults from invalid null or nested values. Inline assets establish the closed media-inert-svg/1 profile; the published string slot is not a claim that arbitrary self-contained SVG is supported."
+    },
+    {
+      "cell": "one-media-plan-drives-every-renderer:hoare-contract",
+      "target": "held",
+      "says": "Compilation is a Hoare-contracted pure function: coded refusals before any output, a deterministic receipt after, effects none; a receiving party can verify the receipt by recompiling. Verification compares every deterministic receipt field, including warnings, checks, options and effects, using the same completion journal; malformed receipts refuse without throwing. Receipt self-replay does not replace independent checks that the admitted asset profile, complete visible URL/DOI/NI locator, and source-to-migration shot/beat/timeline associations survive the actual consumer boundary."
+    },
+    {
+      "cell": "one-media-plan-drives-every-renderer:flow-consumer",
+      "target": "held",
+      "says": "google-flow prepares priced, unsubmitted orders from a plan; queueing is explicit and spending remains flow-generate's. A journal row suppresses a new video order only with compatible video evidence, not prompt identity alone. Explicit author-accepted shot associations remain distinct from inferred journal reuse."
+    },
+    {
+      "cell": "one-media-plan-drives-every-renderer:deterministic-consumer",
+      "target": "held",
+      "says": "The procedural renderer renders a plan end to end locally and checks frame count, geometry, duration and captions against the compile receipt. The compiler refuses unsupported target geometry, shot/cast/dialogue bounds and multiple frame assets before issuing a job; generated end-card identities cannot collide with author shots. These receiver limits do not narrow the shared plan or Flow target. The selected end-card locator is displayed completely, including NI-only identities, or compilation refuses its layout; returning narrative beat runs have unique generated scene IDs without changing author shot or beat IDs."
+    },
+    {
+      "cell": "one-media-plan-drives-every-renderer:producers-migrated",
+      "target": "open",
+      "says": "The education short producer, the Public Fiction commission pipeline and the Climate Place-By-Place video thread emit media plans instead of hand-built order lines and episode JSON."
+    }
+  ],
+  "x-provenance": {
+    "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+    "recorded-on": "2026-10-25",
+    "source": "Owner request: one shared upstream media contract for Google Flow and the deterministic microdrama renderer; standing rule no-work-outside-an-office-duty-and-skill",
+    "source-repair": "PR5 bc46f666c2f093ad3cb439c4fe9aabe1b054bbac received independent source counterexamples. The correction strengthens the existing acceptance obligations; original reported tests are not re-execution, integration, installation or receiving evidence for the correction."
+  }
+}

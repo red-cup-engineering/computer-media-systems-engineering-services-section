@@ -1,0 +1,32 @@
+{
+  "id": "compile-media-plans-for-every-renderer",
+  "name": "compile media plans for every renderer",
+  "authority": "chief-technology-officer",
+  "work": "compile-media-plans-for-every-renderer",
+  "claim": "chief-public-services-officer",
+  "from": "A script, lesson report or research paper that is to become video, and the renderers that exist (Google Flow queue orders, the procedural microdrama renderer).",
+  "to": "One admitted media plan, identified by content address, with a completely replay-verified compilation receipt that each renderer's adapter consumed; or coded/pathful refusals distinguishing invalid plan data from capabilities the selected renderer cannot preserve.",
+  "skills": [
+    "compile-a-media-plan",
+    "run-the-media-plan-cycle"
+  ],
+  "delegation": true,
+  "required-evidence": [
+    "media-plan.admitted.json",
+    "media-plan.compile-receipt.json (all deterministic fields verify using the same supplied completion journal; warnings reviewed after verification)",
+    "Asset-profile admission, complete selected locator in visible end-card text, and source-to-migration shot/beat/order/timing conservation checked separately from successful receipt replay",
+    "render-receipt.json or flow-orders.prepared.json"
+  ],
+  "allowed-effects": [
+    "write plan protocol files inside a working directory"
+  ],
+  "effect-limits": [
+    "no Flow queue write, credit hold, upload or publication without a separate person-authorized step"
+  ],
+  "x-provenance": {
+    "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+    "recorded-on": "2026-10-25",
+    "source": "Owner request: one shared upstream media contract for Google Flow and the deterministic microdrama renderer; standing rule no-work-outside-an-office-duty-and-skill",
+    "note": "authority and claim are the nearest existing offices; the claimant (public fiction and education shorts) has no media office. See system-debt record no-media-office-exists-for-the-claim-side."
+  }
+}

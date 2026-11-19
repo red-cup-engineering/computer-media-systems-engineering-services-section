@@ -1,0 +1,15 @@
+{
+  "id": "no-media-office-exists-for-the-claim-side",
+  "kind": "system-debt",
+  "system": "Office and duty for compiling media plans (lib/agency/offices/media-plan-steward.json, duties/compile-media-plans-for-every-renderer.json)",
+  "owning-section": "561-group-services-section",
+  "breaks-requirements": [
+    "one-media-plan-drives-every-renderer"
+  ],
+  "evidence": "2026-10-25: searched lib/agency/offices, duties and skills of 561-group-services-section for media, flow, video, microdrama and fiction; none exists. The media-plan-steward office is proposed here with no incumbency; the duty's authority (chief-technology-officer) and claim (chief-public-services-officer) are the nearest existing offices, an assumption, not a decision of the Leader.",
+  "repair": "The Leader or chief-of-staff decides which office holds the claim on media plans (Public Fiction, education shorts, Climate Place-By-Place video) and appoints or merges the steward; then correct authority and claim in the duty.",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}

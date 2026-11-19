@@ -1,0 +1,15 @@
+{
+  "id": "flow-clips-have-no-assembly-path-from-a-media-plan",
+  "kind": "system-debt",
+  "system": "Assembly of generated Flow clips with plan captions, SVG overlays and the end card",
+  "owning-section": "media-engineering-services-section",
+  "breaks-requirements": [
+    "one-media-plan-drives-every-renderer"
+  ],
+  "evidence": "2026-10-25: the plan compiles to Flow orders and to a deterministic render job, but nothing yet takes accepted Flow clips (journaled MediaArtifactWorkCompletion outputs, content-addressed) and composites the plan's captions, SVG overlays and end card over them. services/public-fiction-media-services-section/src/microdrama-assembly.mjs assembles from a different manifest shape; the procedural renderer draws previs scenes only.",
+  "repair": "Compile a third output from the plan, an assembly manifest (shot id -> accepted completion output NI, captions, overlays, end card), that microdrama-assembly consumes; verify against the same frame and caption postconditions.",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}

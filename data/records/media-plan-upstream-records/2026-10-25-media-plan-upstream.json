@@ -1,0 +1,175 @@
+{
+  "id": "2026-10-25-media-plan-upstream",
+  "kind": "media-plan-upstream-record",
+  "$comment": "Operational record of the thread that built the shared media plan. No schema exists for this kind yet; it is written in the shape of the system-debt and repository-receiving records (id, kind, evidence-bearing fields, x-provenance). See the system-debt record no-runbook-form-for-norm-triggered-skill-sequences for the related form gap.",
+  "office": "media-plan-steward (proposed, no incumbent)",
+  "duty": "compile-media-plans-for-every-renderer",
+  "skills-used": [
+    "compile-a-media-plan",
+    "run-the-media-plan-cycle",
+    "prepare-flow-orders-from-a-media-plan",
+    "render-a-media-plan-deterministically"
+  ],
+  "observed": {
+    "pipelines": {
+      "flow-orders": "google-flow-engineering-services-section: flow-generate.mjs admits JSONL order lines (consumer, medium video|image, prompt, model, aspect, count, optional sources/destination/purpose/parentVideoId/promptAssembly/orderId), queueFlowOrder writes orders/pending, runFlowQueue spends under the allowance ledger and journals MediaArtifactWorkCompletion lines with NI ids to generations.jsonl. The wire client is text-to-video only (flow-protocol.mjs).",
+      "education-shorts": "causeway public-education-services-section (not cloned) writes the pending/review order lines (education-flow/2 prompt assembly, consumer education-short--series--lesson--angle, purpose youtube-short-companion); the exact lesson caption is composited afterward by a step not found here.",
+      "deterministic-microdrama": "media-engineering-services-section/services/public-fiction-media-services-section (a received copy of causeway-services/public-media-services-section): apps/previsualize-microdrama.mjs renders an episode JSON (episode.shots with frames, locationId, characterIds, action, dialogue; source) to SVG scenes, kinetic score (src/kinetic-score.mjs), SRT, optional espeak rehearsal voice, and an mp4 with ffmpeg pinned for CPU-scalar reproducibility. The serial is The Unassigned Floor (agent-audience episode reader: apps/read-agent-episode.mjs, serve-agent-episode.mjs). A parallel path, microdrama-production/veo-shooting/assembly/release, plans Gemini Veo shoots and assembles accepted footage.",
+      "media-primitives": "computer-media-engineering-services-section src/raster.mjs and audio.mjs are small ffmpeg wrappers (fitJpeg, mediaDurationSeconds, prepareAudioChunks), not the render engine; media-production-scheduling-service schedules microdrama production; youtube-engineering-services-section and google-drive-use-team hold upload and custody; market.561.group src/microdrama.mjs only describes a commission service.",
+      "divergence": "Flow orders are prompt strings with no shot, caption, overlay or paper provenance; the deterministic renderer has shots, dialogue and captions but no prompts, assets from outside, publication metadata or paper link; the Miami review order asks the video model to draw labelled text."
+    },
+    "evidence-scope": "This public record retains source-level domain observations, design decisions and their stated verification limits. Environment, host access, authentication, registry configuration and runtime-state details are excluded; they are not required to establish this source-repair contract."
+  },
+  "decided": [
+    {
+      "decision": "the plan lives in computer-media-engineering-services-section as ./plan",
+      "because": "dependency order data -> code -> networking -> systems: both consumers (google-flow, media-engineering) must be able to depend on it and media-engineering already depends on google-flow, so the plan cannot live in either; computer-media's stated noun is media content; no new repository was needed"
+    },
+    {
+      "decision": "compilers are pure and take the Flow model, catalog price and journal as inputs",
+      "because": "pricing must come from an observed catalog and reuse from the journal; the shared package must not import the Flow package"
+    },
+    {
+      "decision": "compile never queues, spends or publishes",
+      "because": "owner's brief; recorded as rule a-compile-never-queues-spends-or-publishes"
+    },
+    {
+      "decision": "unsupported conditioning, over-long shots, timing drift, unresolved assets and over-long end-card links are refused, never trimmed or dropped",
+      "because": "silent loss of a plan's content is the failure this contract exists to prevent"
+    },
+    {
+      "decision": "a shot already generated for the exact prompt (sha-256 NI, as the journal addresses it) is satisfied, not re-ordered",
+      "because": "Exact prompt identity distinguishes potentially reusable completion evidence; the corrected compatibility requirements are stated in source-correction below."
+    }
+  ],
+  "changed": [
+    {
+      "repo": "red-cup-engineering/computer-media-engineering-services-section",
+      "branch": "media-plan-shared-upstream",
+      "before": "no plan contract; raster.mjs and audio.mjs only",
+      "after": "src/media-plan*.mjs, data/schema/*.json, agency forms, tests, version 0.2.0"
+    },
+    {
+      "repo": "red-cup-engineering/google-flow-engineering-services-section",
+      "branch": "media-plan-flow-consumer",
+      "before": "order lines built by callers",
+      "after": "src/flow-media-plan.mjs, prepare skill, tests, version 0.1.11"
+    },
+    {
+      "repo": "red-cup-engineering/media-engineering-services-section",
+      "branch": "media-plan-deterministic-consumer",
+      "before": "renderer accepted paracosm or development screenplay sources only",
+      "after": "MediaPlanSource accepted, composeShotSvg, caption and asset hooks, apps/render-media-plan.mjs, render skill, tests; existing previs tests still pass"
+    }
+  ],
+  "verified": [
+    "computer-media: 22 tests pass (admission, round-trips of real orders, real journal reuse, Hoare receipt tamper detection, skill scripts)",
+    "media-engineering: 4 new tests pass including a real ffmpeg render with an SVG overlay and end card; 4 existing previsualization tests pass (byte-identical rebuild retained)",
+    "google-flow: flow-media-plan tests were reported passing; the queue-admission test was not included in the original reported evidence",
+    "end to end: Unassigned Floor episode 1 rendered from a plan (51 s, 918 frames, 360x640, audio, captions, end card with paper link) and the same plan compiled to 8 priced, unqueued Flow orders"
+  ],
+  "left-open": [
+    "system-debt-records/* in this directory (11 records)"
+  ],
+  "x-provenance": {
+    "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+    "recorded-on": "2026-10-25",
+    "pull-requests": [
+      "https://github.com/red-cup-engineering/computer-media-engineering-services-section/pull/5",
+      "https://github.com/red-cup-engineering/google-flow-engineering-services-section/pull/15",
+      "https://github.com/red-cup-engineering/media-engineering-services-section/pull/1"
+    ]
+  },
+  "verification-scope": "The changed and verified arrays above preserve the original author's historical report, not independently repeated verification. The independent PR5 source review rejected bc46f666c2f093ad3cb439c4fe9aabe1b054bbac using source counterexamples. The correction was fabricated and independently reviewed before its tests ran. Subsequent hosted source/component qualification is recorded below against exact commits and trees; no local media test, package installation, renderer receiving or deployment is claimed.",
+  "source-correction": {
+    "original": "https://github.com/red-cup-engineering/computer-media-engineering-services-section/pull/5",
+    "rejectedHead": "bc46f666c2f093ad3cb439c4fe9aabe1b054bbac",
+    "consumerSources": {
+      "flow": "2fb038bd433d44177cc5721f3d627183aa0267fa",
+      "media": "af1402b81ebdf1c1de418a4b6a22252ef24cab86"
+    },
+    "decisions": [
+      "Retain the shared pure upstream owner and existing schema shape. Repair its existing typed constructor with explicit closed-object and absent-only-default checks; do not add a parallel generic JSON Schema engine. The canonical json-schema-engineering-services-section evaluator was compared, but adding an unqualified dependency closure is unnecessary for this bounded domain-constructor repair. No evaluator source is copied.",
+      "A matching prompt is insufficient journal evidence. Reuse requires a text-to-video completion with NI-shaped completion/prompt/output identities, video/mp4 MIME, positive bytes and exact aspect; present prompt text must match its NI. This is carried evidence, not independent byte, rights or editorial verification. Explicit author-accepted visual.generated references remain distinct, but supplied metadata must not contradict video reuse.",
+      "Preserve author shot IDs. Generate end-card, or the first free end-card-N beginning at2, and bind its asset by that shot ID as well as asset ID.",
+      "Recompile and compare the complete receipt, not only outputId and planId. Missing/malformed receipt options refuse. The caller must supply the same journal. Replay proves consistency with the carried recipe, not authentication of a historical recipe.",
+      "For procedural-previs/1 only, refuse non-9:16, more than100 total shots including the end card, more than5 cast or12 dialogue lines per shot, and multiple frame assets. A broad renderer extension is separate work; common plan and Flow capacities remain unchanged."
+    ],
+    "verification": [
+      "Retain all original real-fixture plan tests unchanged; add pure synthetic cases for each independent counterexample, all schema-closed objects, every declared default's null/absence distinction and exact receiver boundaries.",
+      "Add the separate canonical test:media-plan script without changing the broad package test. Native no-install CI source enrollment and execution require independent exact-head/effect qualification.",
+      "Correction fabrication and static review performed no local media product execution, tests, imports, install, cleanup, signals, renderer, queue, credentials or package publication. Subsequent hosted component tests and original-generator qualification are separately evidenced below; source text alone does not establish either."
+    ],
+    "outstandingConsumerObligations": [
+      "Media PR1: forward and honor the requested music profile; current renderer derives music from visual style. Existing procedural-renderer-limits-music-none-voice-and-reproducibility remains open.",
+      "Flow PR15: reconcile the frozen lockfile with the new shared supplier and qualify the published package actually installed.",
+      "Media PR1: enroll the new tests in the actual workflow and remove masking continue-on-error only through its original CI owner, then qualify the real receiver.",
+      "All eleven original system-debt records, proposed office/no incumbency, supplier publication, consumer installation, rendering, independent review and useful receiving remain open at their existing owners."
+    ],
+    "review-refinement": {
+      "counterexample": "Independent static review found that invalid render.targets members were refused and then still sorted; a JSON object member with toString:null can throw during normalization.",
+      "requirement": "The existing coded/no-throw admission obligation applies before normalization. Reporting a refusal is not evidence that the invalid raw value is safe for derived operations.",
+      "decision": "Normalize target order only after validating the whole nonempty unique target subset. Retain all-at-once refusals rather than returning early or hiding errors behind a blanket catch.",
+      "audit": "Other admission derivations were inspected: numeric cue bounds use admitted integers or fixed fallbacks, cast/maps/sets use admitted slugs, locator/hash operations use typed admitted strings, publication tag joining uses an admitted string array, and compiler completion-ID sorting filters strings. Add malformed-member and aggregate-refusal regression cases; no execution claim."
+    }
+  },
+  "received-source-qualification": {
+    "sourceCorrectionCommit": "77a662831c38a6a01a615c06af685b70000914fa",
+    "generatedReceiptCommit": "5a0abcf8fe545e8f6edf7a0448360c65424a40dc",
+    "qualifiedTree": "91583fa15db27b51fcde98688133e22dbff979a4",
+    "correctionPullRequest": "https://github.com/red-cup-engineering/computer-media-engineering-services-section/pull/6",
+    "originalPullRequest": "https://github.com/red-cup-engineering/computer-media-engineering-services-section/pull/5",
+    "ciSupplierCommit": "f2a704e7836d80e3844cad9564579014876582fb",
+    "generatedCallerBlob": "a511e15d3fad82a066855e5cdee0de39120efc0a",
+    "generatorReceipt": "The original generator produced the caller from sourceCorrectionCommit. Independent source review accepted its exact bytes and complete tree transformation; the original post-commit verifier accepted generatedReceiptCommit. The original openPullRequest function was not invoked; the authored stacked correction preserves PR5 as the original work.",
+    "runs": [
+      {
+        "event": "push",
+        "url": "https://github.com/red-cup-engineering/computer-media-engineering-services-section/actions/runs/40209450713",
+        "checkoutCommit": "5a0abcf8fe545e8f6edf7a0448360c65424a40dc",
+        "conclusion": "success",
+        "tests": {
+          "intended": 28,
+          "passed": 28,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "event": "pull_request",
+        "url": "https://github.com/red-cup-engineering/computer-media-engineering-services-section/actions/runs/40209455563",
+        "checkoutCommit": "0e468e2ca8f6131ff899a08b7352fd9e4b6251f9",
+        "conclusion": "success",
+        "tests": {
+          "intended": 28,
+          "passed": 28,
+          "failed": 0,
+          "skipped": 0
+        }
+      }
+    ],
+    "testScope": "Independent log review received both original-route jobs: Node 24.21.0, only test/media-plan.test.mjs, concurrency 1, all 21 original cases plus 7 regression groups. The PR synthetic-merge tree equals qualifiedTree. No dependency install, package-manager cache restoration, broad package check, renderer, CLI-skill test or release job ran.",
+    "limits": "These receipts qualify only the named source/component tuple, not later source trees, package publication, consumer installation, renderer receiving or deployment. The CI supplier candidate remains separate from its own unresolved machine integration gate. This record-only revision preserves the generated caller but needs its own exact-head receiving; the earlier full receipt is historical proof, not current-tree parity after a later source edit."
+  },
+  "release-source-correction": {
+    "basis": {
+      "commit": "e288aecff039a00eb87f9768ebfb19de553c2594",
+      "tree": "dbe64e4622f80921169cf70a498574eb4083f7ed",
+      "originalPullRequest": "https://github.com/red-cup-engineering/computer-media-engineering-services-section/pull/5"
+    },
+    "counterexamples": [
+      "The former SVG denylist admitted CSS imports and had no closed markup/namespace/reference model.",
+      "NI-only paper identities were abbreviated on the card, while the old postcondition treated absent href as success.",
+      "Valid A,B,A narrative beat runs generated duplicate scene IDs."
+    ],
+    "alternatives": "The existing XML reader at xml-document-rendering-service 7bd0105e6816f60e91c52d9b1578e75c618577f2 owns general XML/Namespaces reading, but its @rgrove/parse-xml 5.0.0 closure would add an external dependency to this dependency-free package. Its SVG linter is not a closure proof. Rather than extend the denylist or introduce a general XML reader here, recognize the documented finite media-inert-svg/1 domain language. No owner implementation is copied.",
+    "decisions": [
+      "Recognize finite structure, namespace, scalar/entity and attribute languages; validate unique/resolved typed local references and a conservative effective-inherited resource graph. Refuse unsupported input without altering accepted author bytes. This is not arbitrary SVG sanitization, browser security, rights or visual fidelity qualification. Inherited fill/stroke references clear only for proved baseline scalar overrides; uninterpreted and nonbaseline paint forms conservatively retain them, since ignored declarations cannot establish an override.",
+      "Preserve actual public chart example bytes, required hatching/report forms and existing frame/overlay/end-card controls. Unsupported CSS, image/use, prefix rebinding and context paint semantics remain explicit profile limits of the first unreleased plan API.",
+      "Render the complete selected URL, DOI resolver URL or NI; refuse an overlong locator or actually different paper locator. Keep fitting complete secondary DOI text, never an abbreviated identity. Inspect visible generated text in postconditions.",
+      "Give every contiguous raw-beat run a deterministic unique scene ID, reserving future first-run bases before suffixing; preserve author shot IDs, beat IDs, order, frames, dialogue and source identity."
+    ],
+    "verificationScope": "The preceding 28-case receipts remain historical evidence for their named source. This coherent release-source revision appends seven plan regression groups and enrolls the existing one-case CLI protocol test through test:media-plan-release: 36 intended cases, not yet executed for this revision. Existing 28-case test prefix and three unmodified raster tests are preserved. Raster binary availability is unproved on the observed hosted image, so those three cases remain unrun. Source review and original-generated caller/current-head CI receiving are required before integration; no package publication or consumer receiving is inferred.",
+    "methodCorrection": "The existing compile/run-cycle methods now require asset-profile admission, exact locator preservation and source-to-migration invariants against the actual receiver, independently of self-consistent receipt replay. The separate publication, consumer lockfile/music/test-enrollment and all eleven system debts remain at their original owners."
+  }
+}

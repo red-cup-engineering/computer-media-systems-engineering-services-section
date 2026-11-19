@@ -1,0 +1,15 @@
+{
+  "id": "computer-media-0-2-0-must-be-published-before-the-consumers-merge",
+  "kind": "system-debt",
+  "system": "Package order for the media plan upstream",
+  "owning-section": "computer-media-engineering-services-section",
+  "breaks-requirements": [
+    "one-media-plan-drives-every-renderer"
+  ],
+  "evidence": "2026-10-25: google-flow-engineering-services-section and media-engineering-services-section depend on @red-cup-engineering/computer-media-engineering-services-section 0.2.0, which exists only as a branch. Their tests here ran against a symlink to the branch checkout. The registry (registry.561.group) serves 0.1.0.",
+  "repair": "Merge the computer-media PR, publish 0.2.0 through the continuous-delivery section's workflow, then merge the consumer PRs and confirm their tests install the published version.",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}

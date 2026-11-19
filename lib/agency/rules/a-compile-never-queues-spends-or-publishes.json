@@ -1,0 +1,18 @@
+{
+  "id": "a-compile-never-queues-spends-or-publishes",
+  "statement": "Compiling a media plan MUST NOT queue a Flow order, hold or spend credits, upload, or publish. Preparing orders, queueing them, spending them and publishing the result are four separate acts, each by its own skill and each needing its own authority; a refusal is repaired in the plan, never by loosening the output.",
+  "subject": [
+    "*"
+  ],
+  "action": [
+    "compile-media-plan",
+    "prepare-flow-media-plan"
+  ],
+  "because": "The owner's brief for the shared media upstream: do not submit Flow generations or spend credits; a plan is the precondition of a Hoare contract whose postcondition is a receipt with no effects.",
+  "x-provenance": {
+    "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+    "recorded-on": "2026-10-25",
+    "source": "Owner request: one shared upstream media contract for Google Flow and the deterministic microdrama renderer; standing rule no-work-outside-an-office-duty-and-skill"
+  },
+  "name": "a-compile-never-queues-spends-or-publishes"
+}
