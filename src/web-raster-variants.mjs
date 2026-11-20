@@ -1,3 +1,4 @@
+import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { makeTemporaryDirectory } from "@red-cup-engineering/computer-file-engineering-services-section/temporary-directory";
 // Original Computer Media provider: source-qualified candidate web raster encodes.
 // This does not decide reader-task fidelity, publish, or meter electricity.
@@ -14,7 +15,7 @@ const FORMAT = Object.freeze({
   avif: { extension: 'avif', mime: 'image/avif' },
   'dithered-png': { extension: 'png', mime: 'image/png' },
 });
-const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+
 const positive = (v, label, max) => {
   if (!Number.isSafeInteger(v) || v <= 0 || v > max) throw new RangeError(label + ' must be an integer from 1 to ' + max);
 };
@@ -47,7 +48,7 @@ export async function encodeWebRasterVariants(bytes, {
     throw new TypeError('Require source identity, license and explicit derivative authorization');
   }
   const content = Buffer.from(bytes);
-  const sourceDigest = sha256(content);
+  const sourceDigest = sha256Hex(content);
   if (source.sha256 !== undefined && (typeof source.sha256 !== 'string' || source.sha256.toLowerCase() !== sourceDigest)) {
     throw new TypeError('Source digest disagrees with supplied bytes');
   }
@@ -103,7 +104,7 @@ const dir = temporaryDirectory.path;
       if (encoded.length === 0 || encoded.length > maxOutputBytes) throw new RangeError('Encoded ' + format + ' exceeds output byte bound');
       results.push({
         format, mime: FORMAT[format].mime, width, height,
-        bytes: encoded.length, sha256: sha256(encoded), encodeElapsedMs: Number(elapsedNs) / 1e6,
+        bytes: encoded.length, sha256: sha256Hex(encoded), encodeElapsedMs: Number(elapsedNs) / 1e6,
         encoder: version, data: encoded, taskFidelity: 'unassessed',
         electricity: null, greenhouseGases: null,
       });

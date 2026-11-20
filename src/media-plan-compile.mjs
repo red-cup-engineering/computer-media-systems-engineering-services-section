@@ -1,3 +1,4 @@
+import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { isRecord } from "@red-cup-engineering/signcell/values";
 /**
  * Media plan compilers. Pure functions from an admitted media plan (./media-plan.mjs) to:
@@ -11,9 +12,7 @@ import { isRecord } from "@red-cup-engineering/signcell/values";
  * the network. A queue, a renderer or a publisher is a separate, later adapter that takes
  * these outputs as data.
  */
-import {
-  validateMediaPlan, canonicalJson, hexFromNi, linkHref, mediaPlanId, niOf, planShots, resolveLink, sha256Hex, svgIsSelfContained,
-} from './media-plan.mjs';
+import { validateMediaPlan, canonicalJson, hexFromNi, linkHref, mediaPlanId, niOf, planShots, resolveLink, svgIsSelfContained } from "./media-plan.mjs";
 
 export const MEDIA_PLAN_CONTRACT_ID = 'compile-media-plan/1';
 export const DEFAULT_FLOW_MODEL = 'veo_3_1_t2v_lite';

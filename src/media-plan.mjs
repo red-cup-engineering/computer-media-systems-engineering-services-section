@@ -1,3 +1,4 @@
+import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { isRecord } from "@red-cup-engineering/signcell/values";
 /**
  * Media plan: the one upstream contract a script -> scenes -> shots -> assets ->
@@ -52,7 +53,7 @@ export function canonicalJson(value) {
   return `{${Object.keys(value).filter((k) => value[k] !== undefined).sort().map((k) => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',')}}`;
 }
 
-export const sha256Hex = (data) => createHash('sha256').update(data).digest('hex');
+
 /** The content address (RFC 6920 NI, as the Group writes it) of some bytes or text. */
 export const niOf = (data) => `ni:///sha-256;${createHash('sha256').update(data).digest('base64url')}`;
 export const niFromHex = (hex) => `ni:///sha-256;${Buffer.from(hex, 'hex').toString('base64url')}`;

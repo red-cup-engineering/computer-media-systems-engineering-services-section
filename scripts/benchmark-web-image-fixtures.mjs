@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { makeTemporaryDirectory } from "@red-cup-engineering/computer-file-engineering-services-section/temporary-directory";
 // Comparator fixtures: no claims about client photographs or completed visitor tasks.
 import { createHash } from 'node:crypto';
@@ -10,7 +11,7 @@ import { promisify } from 'node:util';
 import { encodeWebRasterVariants } from '../src/web-raster-variants.mjs';
 
 const run = promisify(execFile);
-const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+
 const W = 240, H = 160;
 function rgb(name, x, y) {
   if (name === 'categorical') return [
@@ -42,11 +43,11 @@ try {
     const input = await image(name, dir);
     const result = await encodeWebRasterVariants(input, {
       source: { id:'generated-fixture:' + name, license:'self-generated testing',
-        derivativesAuthorized:true, sha256:sha256(input) },
+        derivativesAuthorized:true, sha256:sha256Hex(input) },
       width:W, height:H, formats:['webp','avif','dithered-png'], allowLossyPreview:true,
     });
     fixtures.push({
-      name, width:W, height:H, sourceBytes:input.length, sourceSha256:sha256(input),
+      name, width:W, height:H, sourceBytes:input.length, sourceSha256:sha256Hex(input),
       candidates:result.candidates.map(item => ({
         format:item.format, bytes:item.bytes, sha256:item.sha256,
         encodeElapsedMs:Number(item.encodeElapsedMs.toFixed(2)), fidelity:item.taskFidelity,
