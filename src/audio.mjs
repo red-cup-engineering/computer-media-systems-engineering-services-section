@@ -1,6 +1,7 @@
-import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { makeTemporaryDirectory } from "@red-cup-engineering/computer-file-engineering-services-section/temporary-directory";
+import { readFile, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -20,7 +21,9 @@ export async function prepareAudioChunks(path, { maxSeconds = 3600, chunkSeconds
   }
   const durationSeconds = await mediaDurationSeconds(path);
   if (!Number.isFinite(durationSeconds) || durationSeconds <= 0 || durationSeconds > maxSeconds) throw new Error(`Audio preparation requires media lasting at most ${maxSeconds} seconds`);
-  const temp = await mkdtemp(join(tmpdir(), "media-audio-"));
+  const temporaryDirectory = makeTemporaryDirectory("media-audio");
+  try {
+const temp = temporaryDirectory.path;
   const chunks = [];
   try {
     for (let offsetSeconds = 0; offsetSeconds < durationSeconds; offsetSeconds += chunkSeconds) {
@@ -33,5 +36,9 @@ export async function prepareAudioChunks(path, { maxSeconds = 3600, chunkSeconds
     return { durationSeconds, chunks };
   } finally {
     await rm(temp, { recursive: true, force: true });
+  }
+
+  } finally {
+    temporaryDirectory.remove();
   }
 }

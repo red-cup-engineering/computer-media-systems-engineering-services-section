@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+import { makeTemporaryDirectory } from "@red-cup-engineering/computer-file-engineering-services-section/temporary-directory";
 // Comparator fixtures: no claims about client photographs or completed visitor tasks.
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, rm, writeFile } from "node:fs/promises";
+
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { encodeWebRasterVariants } from '../src/web-raster-variants.mjs';
@@ -32,7 +33,9 @@ async function image(name, dir) {
   await run('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i', input, '-frames:v', '1', output], { timeout:15000 });
   return await readFile(output);
 }
-const dir = await mkdtemp(join(tmpdir(), '561-media-comparison-'));
+const temporaryDirectory = makeTemporaryDirectory("561-media-comparison");
+try {
+const dir = temporaryDirectory.path;
 try {
   const fixtures = [];
   for (const name of ['categorical', 'gradient-noise', 'linework']) {
@@ -58,3 +61,7 @@ try {
     fixtures,
   }, null, 2) + '\n');
 } finally { await rm(dir, { recursive:true, force:true }); }
+
+} finally {
+  temporaryDirectory.remove();
+}

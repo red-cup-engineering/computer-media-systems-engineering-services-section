@@ -1,9 +1,10 @@
+import { makeTemporaryDirectory } from "@red-cup-engineering/computer-file-engineering-services-section/temporary-directory";
 // Original Computer Media provider: source-qualified candidate web raster encodes.
 // This does not decide reader-task fidelity, publish, or meter electricity.
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, rm, writeFile } from "node:fs/promises";
+
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 
@@ -61,7 +62,9 @@ export async function encodeWebRasterVariants(bytes, {
   if (formats.includes('dithered-png') && allowLossyPreview !== true) {
     throw new TypeError('Dither is an explicitly authorized information-loss preview only');
   }
-  const dir = await mkdtemp(join(tmpdir(), '561-web-raster-'));
+  const temporaryDirectory = makeTemporaryDirectory("561-web-raster");
+  try {
+const dir = temporaryDirectory.path;
   try {
     const input = join(dir, 'input.' + kind.extension);
     await writeFile(input, content, { mode: 0o600 });
@@ -113,4 +116,8 @@ export async function encodeWebRasterVariants(bytes, {
       claims: 'Encoded bytes and execution elapsed time are observed; no task fidelity, accessibility, metered energy or CO2e is established.',
     };
   } finally { await rm(dir, { recursive: true, force: true }); }
+
+  } finally {
+    temporaryDirectory.remove();
+  }
 }
