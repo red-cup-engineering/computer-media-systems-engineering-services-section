@@ -1,5 +1,6 @@
+import { isRecord } from "@red-cup-engineering/signcell/values";
 /** Customer-specific bid refinement of an existing MediaNeed, not a provider registry. */
-const obj=x=>x!==null&&typeof x==="object"&&!Array.isArray(x);
+
 const name=(x,k)=>{if(typeof x!=="string"||!x.trim())throw new TypeError(k+" must be nonempty");return x.trim()};
 const instant=(x,k)=>{const t=Date.parse(name(x,k));if(!Number.isFinite(t))throw new TypeError(k+" must be an instant");return new Date(t).toISOString()};
 const amount=(x,k)=>{if(!Number.isSafeInteger(x)||x<1)throw new TypeError(k+" must be positive integer");return x};
@@ -7,10 +8,10 @@ const COST=new Set(["no-charge","quoted","unknown"]);
 
 /** Bid binds exactly one consumer demand, via a provider-owned Capability Market offerRef. */
 export function validateMediaProviderBid(x){
-  if(!obj(x)||x.type!=="MediaProviderBid"||x.version!==1)throw new TypeError("expected MediaProviderBid v1");
+  if(!isRecord(x)||x.type!=="MediaProviderBid"||x.version!==1)throw new TypeError("expected MediaProviderBid v1");
   const createdAt=instant(x.createdAt,"bid createdAt"),expiresAt=instant(x.expiresAt,"bid expiresAt");
   if(expiresAt<=createdAt)throw new TypeError("bid expiresAt must follow createdAt");
-  if(!obj(x.consideration)||!COST.has(x.consideration.state))throw new TypeError("consideration state must be no-charge, quoted or unknown");
+  if(!isRecord(x.consideration)||!COST.has(x.consideration.state))throw new TypeError("consideration state must be no-charge, quoted or unknown");
   if(x.consideration.state==="quoted")name(x.consideration.termsRef,"termsRef");
   if(x.consideration.state!=="quoted"&&x.consideration.termsRef!==undefined)throw new TypeError("unsettled or no-charge bid cannot carry priced termsRef");
   return Object.freeze({
@@ -24,7 +25,7 @@ export function validateMediaProviderBid(x){
 
 /** Only a consumer can issue an award, separately from a provider offer. */
 export function validateMediaCustomerAward(x){
-  if(!obj(x)||x.type!=="MediaCustomerAward"||x.version!==1)throw new TypeError("expected MediaCustomerAward v1");
+  if(!isRecord(x)||x.type!=="MediaCustomerAward"||x.version!==1)throw new TypeError("expected MediaCustomerAward v1");
   return Object.freeze({
     type:"MediaCustomerAward",version:1,bid:name(x.bid,"selected bid"),
     mediaNeed:name(x.mediaNeed,"MediaNeed"),purpose:name(x.purpose,"purpose"),
@@ -47,7 +48,7 @@ export function evaluateMediaAward({inbox,bid:rawBid,award:rawAward,now=new Date
   const bid=validateMediaProviderBid(rawBid),award=validateMediaCustomerAward(rawAward);
   const at=now instanceof Date?now:new Date(now);
   if(!Number.isFinite(at.getTime()))throw new TypeError("now must be an instant");
-  if(!obj(inbox)||!Array.isArray(inbox.needs)||!Array.isArray(inbox.frontier)||!Array.isArray(inbox.allocations))
+  if(!isRecord(inbox)||!Array.isArray(inbox.needs)||!Array.isArray(inbox.frontier)||!Array.isArray(inbox.allocations))
     return Object.freeze({eligible:false,reasons:Object.freeze(["demand-inbox-not-observed"]),bid,award});
   const reasons=[];
   const need=inbox.needs.find(n=>n.id===bid.mediaNeed);

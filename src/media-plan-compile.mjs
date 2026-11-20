@@ -1,3 +1,4 @@
+import { isRecord } from "@red-cup-engineering/signcell/values";
 /**
  * Media plan compilers. Pure functions from an admitted media plan (./media-plan.mjs) to:
  *   (a) Google Flow queue orders        -> compileFlowOrders
@@ -59,7 +60,7 @@ export const MEDIA_PLAN_CONTRACT = Object.freeze({
 const END_CARD_LINK_WIDTH = 34;
 const END_CARD_LINK_LINES = 4;
 const frozen = (v) => Object.freeze(v);
-const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+
 const rejection = (code, path, message) => frozen({ code, path, message });
 const esc = (value) => String(value).replace(/[&<>"']/gu, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[ch]);
 const frameMs = (frame, fps) => Math.round((frame * 1000) / fps);
@@ -383,7 +384,7 @@ export function compileMediaPlan(input, options = {}) {
   if (!validated.ok) return frozen({ ok: false, refusals: validated.refusals });
   const plan = validated.plan;
   const rejections = [];
-  if (!isObject(options)) return frozen({ ok: false, refusals: frozen([rejection('FIELD_OBJECT', 'options', 'compile options must be an object')]) });
+  if (!isRecord(options)) return frozen({ ok: false, refusals: frozen([rejection('FIELD_OBJECT', 'options', 'compile options must be an object')]) });
   const targets = options.targets === undefined ? plan.render.targets : options.targets;
   if (!Array.isArray(targets) || targets.length === 0 || new Set(targets).size !== targets.length || targets.some((t) => typeof t !== 'string')) rejections.push(rejection('FIELD_ARRAY', 'options.targets', 'targets must be a nonempty array of unique target names'));
   if (options.model !== undefined && (typeof options.model !== 'string' || !options.model.trim())) rejections.push(rejection('FIELD_TEXT', 'options.model', 'model must be nonempty text'));
@@ -426,8 +427,8 @@ export function compileMediaPlan(input, options = {}) {
  * options and show the receipt names exactly what the plan compiles to. Pure.
  */
 export function verifyCompilationRecord(input, record, { completions = [] } = {}) {
-  if (!isObject(record) || record.type !== 'MediaPlanCompilationReceipt' || record.contract !== MEDIA_PLAN_CONTRACT_ID) return frozen({ ok: false, reason: 'not a compile-media-plan/1 receipt' });
-  if (!isObject(record.options) || !Array.isArray(record.targets)
+  if (!isRecord(record) || record.type !== 'MediaPlanCompilationReceipt' || record.contract !== MEDIA_PLAN_CONTRACT_ID) return frozen({ ok: false, reason: 'not a compile-media-plan/1 receipt' });
+  if (!isRecord(record.options) || !Array.isArray(record.targets)
     || !Object.hasOwn(record.options, 'model') || !Object.hasOwn(record.options, 'maxClipSeconds')
     || !Array.isArray(record.options.completionsConsulted)) return frozen({ ok: false, reason: 'receipt options and targets are required' });
   const again = compileMediaPlan(input, { targets: record.targets, model: record.options.model, maxClipSeconds: record.options.maxClipSeconds, completions });

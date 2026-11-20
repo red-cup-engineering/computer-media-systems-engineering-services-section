@@ -1,9 +1,10 @@
+import { isRecord } from "@red-cup-engineering/signcell/values";
 /**
  * Provider-neutral projection of the EXISTING allocation + consumer + binary
  * custody evidence into an independent receiving queue. It does not decide
  * editorial acceptance, publish, or accept provider-authored success claims.
  */
-const clean=(x)=>x!==null&&typeof x==="object"&&!Array.isArray(x);
+
 
 export function projectMediaArtifactReviewQueue({
   allocations,needs,reviews=[],artifacts=[],now=new Date()
@@ -14,7 +15,7 @@ export function projectMediaArtifactReviewQueue({
   const reviewed=new Set(reviews.map(r=>r.allocation));
   const byAllocation=new Map(),ambiguous=new Set();
   for(const a of artifacts){
-    if(!clean(a)||typeof a.allocation!=="string"||!a.allocation.trim())
+    if(!isRecord(a)||typeof a.allocation!=="string"||!a.allocation.trim())
       throw new TypeError("custody artifact needs allocation identity");
     if(byAllocation.has(a.allocation))ambiguous.add(a.allocation);
     else byAllocation.set(a.allocation,a);

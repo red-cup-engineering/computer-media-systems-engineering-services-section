@@ -1,3 +1,4 @@
+import { isRecord } from "@red-cup-engineering/signcell/values";
 /**
  * Pure conservation law for work claimed by competing media micro-enterprises.
  * The original MediaNeed demand is the finite supply of work; provider bids are
@@ -7,7 +8,7 @@
 const ACTIVE=new Set(["held","generated","delivered"]);
 const DONE="public-use";
 const RELEASED=new Set(["released","refused"]);
-const record=x=>x!==null&&typeof x==="object"&&!Array.isArray(x);
+
 export const mediaArtifactKey=(need,purpose)=>JSON.stringify([need,purpose]);
 
 export function measureMediaDemandConservation({needs,allocations}={}){
@@ -15,7 +16,7 @@ export function measureMediaDemandConservation({needs,allocations}={}){
     throw new TypeError("needs and latest allocation states must be arrays");
   const objects=new Map();
   for(const need of needs){
-    if(!record(need)||typeof need.id!=="string"||!Array.isArray(need.artifacts))
+    if(!isRecord(need)||typeof need.id!=="string"||!Array.isArray(need.artifacts))
       throw new TypeError("invalid MediaNeed");
     for(const artifact of need.artifacts){
       const key=mediaArtifactKey(need.id,artifact.purpose);
@@ -28,7 +29,7 @@ export function measureMediaDemandConservation({needs,allocations}={}){
   }
   const seen=new Set(),orphans=[],invalid=[];
   for(const allocation of allocations){
-    if(!record(allocation)||typeof allocation.allocation!=="string"||
+    if(!isRecord(allocation)||typeof allocation.allocation!=="string"||
       !Number.isSafeInteger(allocation.count)||allocation.count<1)
       throw new TypeError("latest allocation needs exact identity and positive count");
     if(seen.has(allocation.allocation))throw new Error("duplicate latest allocation identity");

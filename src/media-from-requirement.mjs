@@ -1,3 +1,4 @@
+import { isRecord } from "@red-cup-engineering/signcell/values";
 /**
  * Projection, not another requirement ontology: a live 561 Group requirement
  * of kind "requirement", with source SignCell when present, can become a
@@ -5,7 +6,7 @@
  * media brief. This projection neither authorizes rights nor procures a model.
  */
 import {validateMediaNeed} from "./media-need-contract.mjs";
-const record=x=>x!==null&&typeof x==="object"&&!Array.isArray(x);
+
 const required=(v,name)=>{
   if(typeof v!=="string"||!v.trim())throw new TypeError(name+" is required");
   return v.trim();
@@ -20,11 +21,11 @@ const required=(v,name)=>{
  * the consuming office must name objective, destination, output and review.
  */
 export function proposeMediaNeedFromRequirement({requirement,brief,sourcePath}={}){
-  if(!record(requirement)||requirement.kind!=="requirement")
+  if(!isRecord(requirement)||requirement.kind!=="requirement")
     throw new TypeError("existing native kind=requirement record required");
   const id=required(requirement.id,"native requirement id");
   required(requirement.asks,"original requirement ask");
-  if(!record(brief)||!Array.isArray(brief.artifacts)||brief.artifacts.length===0)
+  if(!isRecord(brief)||!Array.isArray(brief.artifacts)||brief.artifacts.length===0)
     throw new TypeError("consuming service media brief and artifacts required");
   const path=required(sourcePath,"source requirement path");
   const consumer=required(brief.consumer,"consuming service");
@@ -32,10 +33,10 @@ export function proposeMediaNeedFromRequirement({requirement,brief,sourcePath}={
   if(typeof brief.openedAt!=="string"||!Number.isFinite(Date.parse(brief.openedAt)))
     throw new TypeError("openedAt must be an instant");
   const cell=requirement["x-provenance"]?.["sign-cell"]??requirement["sign-cell"];
-  if(cell!==undefined&&(!record(cell)||typeof cell.mark!=="string"||!cell.mark.startsWith("ni:///sha-256;")))
+  if(cell!==undefined&&(!isRecord(cell)||typeof cell.mark!=="string"||!cell.mark.startsWith("ni:///sha-256;")))
     throw new TypeError("native SignCell source mark is invalid");
   const artifacts=brief.artifacts.map((raw,index)=>{
-    if(!record(raw))throw new TypeError("artifact "+index+" must be an object");
+    if(!isRecord(raw))throw new TypeError("artifact "+index+" must be an object");
     return {
       capability:required(raw.capability,"artifact capability"),
       purpose:required(raw.purpose,"artifact purpose"),
