@@ -1,0 +1,30 @@
+{
+  "id": "media-plan-steward",
+  "name": "media plan steward",
+  "kind": "office",
+  "normative-structure": "Keep the one upstream media plan (script, scenes, shots, assets, captions, audio, render target, publication metadata) coherent, versioned and compilable, so that Google Flow production and deterministic rendering consume the same plan and neither silently drifts from it.",
+  "deontic-profile": {
+    "compile-media-plans-for-every-renderer": "duty",
+    "media-plan-schema-and-contract": "deontic-power"
+  },
+  "bears-duty": [
+    "emsenn/duty/compile-media-plans-for-every-renderer"
+  ],
+  "provides-skill": [
+    "compile-a-media-plan",
+    "run-the-media-plan-cycle"
+  ],
+  "authority-scope": [
+    "services/computer-media-engineering-services-section"
+  ],
+  "jurisdiction": "red-cup-engineering",
+  "part-of": "computer-media-engineering-services-section",
+  "reports-to": "chief-technology-officer",
+  "theory-basis": "A plan is the precondition of a Hoare triple whose postcondition is a receipt; the office answers for the contract, not for any one renderer.",
+  "x-provenance": {
+    "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+    "recorded-on": "2026-10-25",
+    "source": "Owner request: one shared upstream media contract for Google Flow and the deterministic microdrama renderer; standing rule no-work-outside-an-office-duty-and-skill",
+    "note": "Proposed office: no media office existed in lib/agency/offices (searched 2026-10-25). Not an appointment; no incumbency claimed."
+  }
+}

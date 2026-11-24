@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/red-cup-engineering/computer-media-engineering-services-section/data/schema/media-plan-compilation-receipt.schema.json",
+  "title": "MediaPlanCompilationReceipt",
+  "$comment": "Postcondition record of compile-media-plan/1. Deterministic: no clock, no randomness; compiling the same plan with the same options gives the same bytes. effects is always none. Receiving compares every carried field against recompilation with the same journal; outputId alone does not audit warnings, checks, options or effects.",
+  "type": "object",
+  "required": ["type", "version", "contract", "effects", "planId", "planSlug", "targets", "options", "checks", "warnings", "outputId", "outputs"],
+  "additionalProperties": false,
+  "properties": {
+    "type": { "const": "MediaPlanCompilationReceipt" },
+    "version": { "const": 1 },
+    "contract": { "const": "compile-media-plan/1" },
+    "effects": { "const": "none" },
+    "planId": { "type": "string", "pattern": "^ni:///sha-256;[A-Za-z0-9_-]{43}$" },
+    "planSlug": { "type": "string" },
+    "targets": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["flow", "deterministic"] } },
+    "options": { "type": "object", "additionalProperties": false, "required": ["model", "maxClipSeconds", "completionsConsulted"], "properties": { "model": { "type": "string", "minLength": 1 }, "maxClipSeconds": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }, "completionsConsulted": { "type": "array", "items": { "type": "string" } } } },
+    "checks": { "type": "array", "items": { "type": "object", "required": ["name", "ok"], "additionalProperties": false, "properties": { "name": { "type": "string" }, "ok": { "const": true } } } },
+    "warnings": { "type": "array", "items": { "type": "object", "required": ["code", "shotId", "message"], "additionalProperties": false, "properties": { "code": { "type": "string" }, "shotId": { "type": "string" }, "message": { "type": "string" } } } },
+    "outputId": { "type": "string", "pattern": "^ni:///sha-256;[A-Za-z0-9_-]{43}$" },
+    "outputs": {
+      "type": "object",
+      "required": ["flow", "deterministic", "publication"],
+      "properties": {
+        "flow": {
+          "type": ["object", "null"],
+          "required": ["orders", "satisfied", "deterministicOnly"],
+          "properties": {
+            "orders": { "type": "array", "items": { "type": "object", "required": ["consumer", "medium", "model", "aspect", "count", "prompt", "purpose", "promptAssembly", "orderId"], "properties": { "medium": { "const": "video" }, "count": { "const": 1 } } }, "$comment": "Each is a line flow-generate's admitOrder accepts; the receipt does not queue it." },
+            "satisfied": { "type": "array", "items": { "type": "object", "required": ["shotId", "reason", "generations"] } },
+            "deterministicOnly": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "deterministic": { "type": ["object", "null"], "required": ["type", "renderer", "planId", "input", "options", "captions", "assets", "totalFrames"], "properties": { "type": { "const": "DeterministicRenderJob" } } },
+        "publication": { "type": "object", "required": ["title", "description", "privacy", "links"] }
+      }
+    }
+  }
+}

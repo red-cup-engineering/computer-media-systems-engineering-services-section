@@ -1,0 +1,15 @@
+{
+  "id": "flow-wire-client-is-text-to-video-only-so-plans-cannot-carry-character-continuity",
+  "kind": "system-debt",
+  "system": "google-flow-engineering-services-section src/flow-protocol.mjs requireFlowTextVideoRequest and flow-scene-plan.mjs planFlowReferencedSceneTrial",
+  "owning-section": "google-flow-engineering-services-section",
+  "breaks-requirements": [
+    "one-media-plan-drives-every-renderer"
+  ],
+  "evidence": "2026-10-25: the wire client submits only text-to-video. A media plan shot carrying visual.referenceImages is refused with REFERENCE_CONDITIONING_UNSUPPORTED rather than silently dropped, so a plan that needs consistent characters across shots (the Unassigned Floor cast, the Second Receipt cast) cannot be ordered from Flow today; only the UI-only planFlowReferencedSceneTrial handoff exists.",
+  "repair": "Implement Ingredients-to-Video submission in the wire client behind its own admission and verification; then lift the refusal in compileFlowOrders for the models the catalog lists (veo_3_1_r2v_*, abra_r2v_*).",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}

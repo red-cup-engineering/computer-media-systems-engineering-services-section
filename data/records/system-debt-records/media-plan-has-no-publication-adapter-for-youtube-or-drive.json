@@ -1,0 +1,15 @@
+{
+  "id": "media-plan-has-no-publication-adapter-for-youtube-or-drive",
+  "kind": "system-debt",
+  "system": "Publication step of the media plan cycle (publication metadata, caption tracks, end-card link)",
+  "owning-section": "youtube-engineering-services-section",
+  "breaks-requirements": [
+    "one-media-plan-drives-every-renderer"
+  ],
+  "evidence": "2026-10-25: compilePublication returns title, description with the paper link, tags, privacy, caption track hash and VTT, parentVideoId; nothing maps it to youtube-engineering-services-section videos.insert/captions.insert or to google-drive-use-team custody. Deliberately not wired: this thread may not publish or upload.",
+  "repair": "A publication skill reads render-receipt.json and media-plan.compile-receipt.json, builds the YouTube video resource and caption upload, and keeps Drive custody, each behind person-authorized steps and the AI-disclosure/C2PA path (c2pa-engineering-services-section).",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}

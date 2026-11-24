@@ -1,0 +1,8 @@
+[submodule "services/computer-news-media-systems-engineering-services-section"]
+	path = services/computer-news-media-systems-engineering-services-section
+	url = https://github.com/red-cup-engineering/computer-news-media-systems-engineering-services-section.git
+	branch = main
+[submodule "services/public-fiction-media-services-section"]
+	path = services/public-fiction-media-services-section
+	url = https://github.com/red-cup-engineering/public-fiction-media-services-section.git
+	branch = main

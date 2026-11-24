@@ -1,0 +1,15 @@
+{
+  "id": "media-engineering-holds-a-received-copy-of-public-media-services-section",
+  "kind": "system-debt",
+  "system": "services/public-fiction-media-services-section in red-cup-engineering/media-engineering-services-section",
+  "owning-section": "media-engineering-services-section",
+  "breaks-requirements": [
+    "one-media-plan-drives-every-renderer"
+  ],
+  "evidence": "2026-10-25: git log shows 'Receive code from causeway-services/public-media-services-section@2ae1a23'. The microdrama code (previsualize, assembly, veo shooting, commission) exists there as a received copy; market.561.group's microdrama.mjs only describes a commission service and links to causeway-services/public-media-services-section. This thread edited the media-engineering copy (previsualize-microdrama.mjs, new render-media-plan.mjs); which repository is canonical was not established.",
+  "repair": "Owner names the canonical home of Public Fiction; port the render-media-plan adapter there or retire the copy.",
+  "after": [],
+  "status": "open",
+  "recorded-by": "media-upstream thread (Claude Sonnet 5.5 session, 2026-10-25)",
+  "recorded-on": "2026-10-25"
+}
