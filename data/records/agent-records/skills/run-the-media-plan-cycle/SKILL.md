@@ -34,7 +34,7 @@ Step 5 is a separate, explicit act: preparing orders spends nothing, queueing wr
 
 ## Checks between steps
 
-- Before 2: establish actual [`media-inert-svg/1`](../../../../data/schema/media-inert-svg-profile.md) admission for every carried inline asset; a producer's “self-contained” claim alone is insufficient. On episode migration, compare source shot/beat IDs, sequence, frames and dialogue against the plan, including returning beat runs and generated scene-ID collisions.
+- Before 2: establish actual [`media-inert-svg/1`](../../../../schema/media-inert-svg-profile.md) admission for every carried inline asset; a producer's “self-contained” claim alone is insufficient. On episode migration, compare source shot/beat IDs, sequence, frames and dialogue against the plan, including returning beat runs and generated scene-ID collisions.
 - After 2: preserve the exact completion journal used for this compilation; a new journal requires a new receipt.
 - After 3: exit 0 from whole-receipt replay, including warnings, checks, effects, options and outputs.
   Only then read `warnings`; no `GENERATIVE_TEXT_REQUEST` remains unaddressed for a text-bearing graphic.

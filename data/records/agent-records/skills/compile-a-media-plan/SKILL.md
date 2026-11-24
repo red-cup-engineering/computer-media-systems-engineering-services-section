@@ -13,17 +13,17 @@ publisher) must consume it. **Done when:** `media-plan.compile-receipt.json` exi
 
 | | |
 |---|---|
-| **Input** | `PLAN.json` against [`data/schema/media-plan.schema.json`](../../../../data/schema/media-plan.schema.json) |
+| **Input** | `PLAN.json` against [`data/schema/media-plan.schema.json`](../../../../schema/media-plan.schema.json) |
 | **Precondition** | `admitMediaPlan` accepts its closed schema shape (unknown fields refuse; defaults apply only to absence): references resolve, cues sit inside shots and speakers inside casts, SVG establishes the closed `media-inert-svg/1` profile, source revision is exact, every source document is addressed (NI, https URL or DOI), a paper link exists when `publication.requirePaperLink`, and per target: no reference conditioning or over-long clips for `flow`; no timing drift or unresolved assets, only 9:16, at most 100 total shots including the end card, 5 cast and 12 dialogue lines per shot, and one frame asset per shot for `deterministic` |
 | **Script** | [`scripts/compile-media-plan.mjs`](scripts/compile-media-plan.mjs) |
-| **Output protocol files** | `media-plan.admitted.json` (the plan every consumer reads), `media-plan.compile-receipt.json` ([schema](../../../../data/schema/media-plan-compilation-receipt.schema.json)), or `media-plan.refusals.json` |
+| **Output protocol files** | `media-plan.admitted.json` (the plan every consumer reads), `media-plan.compile-receipt.json` ([schema](../../../../schema/media-plan-compilation-receipt.schema.json)), or `media-plan.refusals.json` |
 | **Postcondition** | effects none; every shot accounted for once (ordered, satisfied by an accepted generation, or deterministic-only); frames conserved; every dialogue line captioned; the paper link is in the description and on the end card; same plan and compilation inputs give the same bytes |
-| **Refusals** | coded, with a path: see `MEDIA_PLAN_CONTRACT.refusals` in [`src/media-plan-compile.mjs`](../../../../src/media-plan-compile.mjs) |
+| **Refusals** | coded, with a path: see `MEDIA_PLAN_CONTRACT.refusals` in [`src/media-plan-compile.mjs`](../../../../../src/media-plan-compile.mjs) |
 | **Audit** | [`scripts/verify-compile-receipt.mjs`](scripts/verify-compile-receipt.mjs): recompiles with the same completion journal and compares every carried receipt field, including warnings, checks, options, effects and outputs |
 
 ## Steps
 
-1. Before compiling, establish the actual inline asset profile: [`media-inert-svg/1`](../../../../data/schema/media-inert-svg-profile.md), not a producer's generic “safe SVG” label. Unsupported syntax refuses; do not strip it or substitute an unchecked asset. When migrating an episode, compare source and candidate shot IDs, raw beat IDs, order, frames and dialogue. Returning beat runs have distinct generated scene IDs; the author associations must remain unchanged.
+1. Before compiling, establish the actual inline asset profile: [`media-inert-svg/1`](../../../../schema/media-inert-svg-profile.md), not a producer's generic “safe SVG” label. Unsupported syntax refuses; do not strip it or substitute an unchecked asset. When migrating an episode, compare source and candidate shot IDs, raw beat IDs, order, frames and dialogue. Returning beat runs have distinct generated scene IDs; the author associations must remain unchanged.
 2. Run `node scripts/compile-media-plan.mjs PLAN.json --out DIR` (add `--completions generations.jsonl`
    with the Flow journal so only compatible video completions satisfy shots). A journal row needs text-to-video capability, video/mp4 output with positive bytes, completion/prompt/output NIs and exact aspect; prompt text, when supplied, must match its NI. This does not independently verify bytes, rights or editorial acceptance.
 3. Exit 2 means refusals: read `DIR/media-plan.refusals.json`. Fix invalid **plan data** (never the output), then recompile. `RENDERER_UNSUPPORTED` instead identifies a selected receiver limit: choose a supported target or carry a change through that renderer's owner; do not silently narrow the common plan. `SVG_NOT_SELF_CONTAINED` means the supported profile was not established, not that every refused SVG is unsafe. A model/composition defect requires returning to requirements and architecture before a coherent repair, not a crash/trace/patch loop.
