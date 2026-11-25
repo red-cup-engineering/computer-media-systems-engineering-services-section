@@ -2,7 +2,6 @@
 import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { makeTemporaryDirectory } from "@red-cup-engineering/computer-file-engineering-services-section/temporary-directory";
 // Comparator fixtures: no claims about client photographs or completed visitor tasks.
-import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { readFile, rm, writeFile } from "node:fs/promises";
 

@@ -1,9 +1,9 @@
-import { createHash } from "node:crypto";
+import { niUriFromDigest, sha256 } from "@red-cup-engineering/semiotic-content-address-system";
 import { canonicalJson } from "@red-cup-engineering/json-engine/canonical-json";
 import * as googleFlow from "@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section/flow-generate";
 import { planMediaDemandInbox, readMediaDemandInbox, recordMediaAllocationState } from "./media-demand-journal.mjs";
 
-const allocationId = (value) => `ni:///sha-256;${createHash("sha256").update(canonicalJson(value)).digest("base64url")}`;
+const allocationId = (value) => niUriFromDigest(sha256(canonicalJson(value)));
 
 function generationOf(need, purpose) {
   const artifact = need.artifacts.find((item) => item.purpose === purpose);

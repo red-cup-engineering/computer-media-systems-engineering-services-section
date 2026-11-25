@@ -1,4 +1,5 @@
-import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
+import { canonicalJson } from "@red-cup-engineering/json-engine/canonical-json";
+import { niUriFromDigest, sha256, sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { isRecord } from "@red-cup-engineering/signcell/values";
 /**
  * Media plan: the one upstream contract a script -> scenes -> shots -> assets ->
@@ -16,7 +17,6 @@ import { isRecord } from "@red-cup-engineering/signcell/values";
  * Admission never throws for plan content. It answers every refusal at once, each
  * with a stable code and a path, so a caller (or a bazaar contract) can act on codes.
  */
-import { createHash } from 'node:crypto';
 import { isMediaInertSvg } from './media-inert-svg.mjs';
 
 export const MEDIA_PLAN_KIND = 'MediaPlan';
@@ -42,20 +42,9 @@ export const VOICES = Object.freeze(['none', 'rehearsal']);
 export const ASSET_ROLES = Object.freeze(['frame', 'overlay']);
 export const PRIVACY = Object.freeze(['private', 'unlisted', 'public']);
 
-/** Stable stringification: object keys sorted, no whitespace. Identity is taken over this. */
-export function canonicalJson(value) {
-  if (value === null || typeof value !== 'object') {
-    if (value === undefined) throw new TypeError('undefined has no canonical form');
-    if (typeof value === 'number' && !Number.isFinite(value)) throw new TypeError('non-finite number has no canonical form');
-    return JSON.stringify(value);
-  }
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
-  return `{${Object.keys(value).filter((k) => value[k] !== undefined).sort().map((k) => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',')}}`;
-}
-
 
 /** The content address (RFC 6920 NI, as the Group writes it) of some bytes or text. */
-export const niOf = (data) => `ni:///sha-256;${createHash('sha256').update(data).digest('base64url')}`;
+export const niOf = (data) => niUriFromDigest(sha256(data));
 export const niFromHex = (hex) => `ni:///sha-256;${Buffer.from(hex, 'hex').toString('base64url')}`;
 export const hexFromNi = (ni) => (isNi(ni) ? Buffer.from(ni.slice('ni:///sha-256;'.length), 'base64url').toString('hex') : null);
 

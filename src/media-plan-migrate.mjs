@@ -6,7 +6,8 @@
  *     producer writes it) -> mediaPlanFromFlowOrderLine
  * Pure. The result is a plan *candidate*: pass it to admitMediaPlan / compileMediaPlan.
  */
-import { canonicalJson, niFromHex, niOf } from './media-plan.mjs';
+import { canonicalJson } from "@red-cup-engineering/json-engine/canonical-json";
+import { niFromHex, niOf } from './media-plan.mjs';
 
 const slugify = (value, fallback = 'plan') => {
   const s = String(value).toLowerCase().replace(/[^a-z0-9]+/gu, '-').replace(/^-+|-+$/gu, '').slice(0, 80).replace(/-+$/u, '');

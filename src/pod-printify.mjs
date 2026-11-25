@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { readFileSync, realpathSync, statSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 import { validateAcceptedMediaAsset } from './media-accepted-asset-contract.mjs';
@@ -21,7 +21,7 @@ const finite = (value, field) => {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw new TypeError(`${field} must be finite number`);
   return value;
 };
-const digestOf = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const digestOf = value => sha256Hex(JSON.stringify(value));
 
 // Validate handoff data. Referenced approvals must be verified by independent receiving authority.
 export function validatePrintifyRelease(raw) {
@@ -77,7 +77,7 @@ function assetBytes(root, asset) {
   if (file !== base && !file.startsWith(base + sep)) throw new Error('artwork escaped source custody');
   if (!statSync(file).isFile()) throw new Error('artwork must be a regular file');
   const bytes = readFileSync(file);
-  if (createHash('sha256').update(bytes).digest('hex') !== asset.sha256) throw new Error('artwork SHA-256 mismatch');
+  if (sha256Hex(bytes) !== asset.sha256) throw new Error('artwork SHA-256 mismatch');
   if (bytes.length < 33 || !bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')) || bytes.toString('ascii', 12, 16) !== 'IHDR')
     throw new Error('artwork is not a PNG');
   if (bytes.readUInt32BE(16) !== asset.width || bytes.readUInt32BE(20) !== asset.height)

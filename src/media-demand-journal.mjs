@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { niUriFromDigest, sha256 } from "@red-cup-engineering/semiotic-content-address-system";
 import { canonicalJson } from "@red-cup-engineering/json-engine/canonical-json";
 import { createEvidenceJournal } from "@red-cup-engineering/semantic-record-journal-service";
 import { validateMediaNeed, mediaDemandFrontier, planMediaAllowance } from "./media-demand-market.mjs";
@@ -36,7 +36,7 @@ const instant = (value, label) => {
   if (!Number.isFinite(at)) throw new TypeError(`${label} must be an instant`);
   return new Date(at).toISOString();
 };
-const contentId = (value) => `ni:///sha-256;${createHash("sha256").update(canonicalJson(value)).digest("base64url")}`;
+const contentId = (value) => niUriFromDigest(sha256(canonicalJson(value)));
 const log = (root, objectKind) => createEvidenceJournal({ root, objectKind });
 
 export function createMediaNeed(value) {

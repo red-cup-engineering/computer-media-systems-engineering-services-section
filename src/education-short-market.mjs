@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { niUriFromDigest, sha256 } from "@red-cup-engineering/semiotic-content-address-system";
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { canonicalJson } from "@red-cup-engineering/json-engine/canonical-json";
@@ -12,7 +12,7 @@ const CAPABILITY="source-grounded-short-video";
 const SIX_HOURS=6*60*60*1000;
 const SHORT_PROBE_COOLDOWN_MS=5*60*60*1000;
 
-const allocationId=(value)=>`ni:///sha-256;${createHash("sha256").update(canonicalJson(value)).digest("base64url")}`;
+const allocationId=(value)=>niUriFromDigest(sha256(canonicalJson(value)));
 
 async function educationSurface(injected){
   if(injected) return injected;

@@ -1,3 +1,4 @@
+import { concatBytes, makeNiUri, niUriFromDigest, sha256 } from "@red-cup-engineering/semiotic-content-address-system";
 import { assert } from "@red-cup-engineering/signcell/values";
 /**
  * Render the video cuts in a real OpenTimelineIO Timeline.1/Track.1/Clip.2
@@ -13,7 +14,6 @@ import { assert } from "@red-cup-engineering/signcell/values";
  * This is a neutral media transform, not a reviewer, rights authority,
  * publisher, SignCell replacement, Notebook provider or YouTube uploader.
  */
-import {createHash,randomUUID} from 'node:crypto';
 import {createReadStream} from 'node:fs';
 import {lstat,mkdir,mkdtemp,readFile,realpath,rm,link} from 'node:fs/promises';
 import {dirname,join,resolve} from 'node:path';
@@ -31,9 +31,9 @@ const integer=value=>Number.isSafeInteger(value)&&value>=0;
 export const OTIO_RENDER_TYPE='SourceBoundOtioRenderedVideo';
 
 async function contentNi(file){
- const digest=createHash('sha256');
- for await(const bytes of createReadStream(file))digest.update(bytes);
- return 'ni:///sha-256;'+digest.digest('base64url');
+ const chunks=[];
+ for await(const bytes of createReadStream(file))chunks.push(bytes);
+ return makeNiUri(concatBytes(...chunks));
 }
 async function probe(file){
  const {stdout}=await execFile('ffprobe',['-v','error','-show_entries',
@@ -202,7 +202,7 @@ export async function renderOtioVideoCuts({
   return Object.freeze({
    type:OTIO_RENDER_TYPE,schemaVersion:1,
    status:created?'rendered-original-OTIO':'identical-master-already-received',
-   sourceOtioNi:'ni:///sha-256;'+createHash('sha256').update(editBytes).digest('base64url'),
+   sourceOtioNi:niUriFromDigest(sha256(editBytes)),
    outputVideoPath:output,outputVideoNi:outputNi,mediaType:'video/mp4',
    outputDurationSeconds:observed.durationSeconds,expectedDurationSeconds:plan.expectedDurationSeconds,
    width,height,frameRate,clipCount:plan.cuts.length,

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { sha256, sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { readFileSync } from "node:fs";
 import { resolve, sep } from "node:path";
 import * as googleFlow from "@red-cup-engineering/google-flow-computer-inference-system-engineering-services-section/flow-generate";
@@ -12,7 +12,7 @@ const TID_ALPHABET="234567abcdefghijklmnopqrstuvwxyz";
 export function blueskyTid({at,salt}) {
   const millis=Date.parse(at);
   if(!Number.isFinite(millis)) throw new TypeError("Bluesky TID needs an instant");
-  const digest=createHash("sha256").update(String(salt)).digest();
+  const digest=Buffer.from(sha256(String(salt)));
   const clock=BigInt(((digest[0] << 8) | digest[1]) & 1023);
   let value=(BigInt(millis)*1000n << 10n) | clock;
   const chars=Array(13);
@@ -94,7 +94,7 @@ export async function publishAcceptedMedia({
     const path=assetPath(root,review.asset.relativePath);
     let bytes;
     try{bytes=readFileSync(path);}catch(error){obstructions.push({allocation:state.allocation,reason:`accepted-asset-unreadable: ${error.message}`});continue;}
-    const digest=createHash("sha256").update(bytes).digest("hex");
+    const digest=sha256Hex(bytes);
     if(digest!==review.asset.sha256){obstructions.push({allocation:state.allocation,reason:"accepted-asset-digest-mismatch"});continue;}
     const {handle,text,url}=review.distribution;
     const rkey=blueskyTid({at:review.recordedAt,salt:review.allocation});

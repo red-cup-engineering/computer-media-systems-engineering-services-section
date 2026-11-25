@@ -2,7 +2,6 @@ import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system"
 import { makeTemporaryDirectory } from "@red-cup-engineering/computer-file-engineering-services-section/temporary-directory";
 // Original Computer Media provider: source-qualified candidate web raster encodes.
 // This does not decide reader-task fidelity, publish, or meter electricity.
-import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { readFile, rm, writeFile } from "node:fs/promises";
 
