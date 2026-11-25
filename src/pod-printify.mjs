@@ -1,3 +1,4 @@
+import { canonicalJson } from "@red-cup-engineering/json-engine/canonical-json";
 import { sha256Hex } from "@red-cup-engineering/semiotic-content-address-system";
 import { readFileSync, realpathSync, statSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
@@ -21,7 +22,7 @@ const finite = (value, field) => {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw new TypeError(`${field} must be finite number`);
   return value;
 };
-const digestOf = value => sha256Hex(JSON.stringify(value));
+const digestOf = value => sha256Hex(canonicalJson(value));
 
 // Validate handoff data. Referenced approvals must be verified by independent receiving authority.
 export function validatePrintifyRelease(raw) {
