@@ -36,13 +36,13 @@ const instant = (value, label) => {
   if (!Number.isFinite(at)) throw new TypeError(`${label} must be an instant`);
   return new Date(at).toISOString();
 };
-const contentId = (value) => niUriFromDigest(sha256(canonicalJson(value)));
+const canonicalRecordNiUri = (value) => niUriFromDigest(sha256(canonicalJson(value)));
 const log = (root, objectKind) => createEvidenceJournal({ root, objectKind });
 
 export function createMediaNeed(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new TypeError("media need must be an object");
   const { id: supplied, ...body } = value;
-  return validateMediaNeed({ ...body, id: supplied ?? contentId(body) });
+  return validateMediaNeed({ ...body, id: supplied ?? canonicalRecordNiUri(body) });
 }
 
 export function recordMediaNeed({ root, need, origin } = {}) {
